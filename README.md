@@ -66,3 +66,9 @@ Public spectators can read the board, records and results. Controls require the 
 Run `npm test` and `npm run build:pages`. Rule tests and mocked provider tests verify mechanics and integration contracts, not real model performance. Physical playtesting and actual paid model validation remain to be done.
 
 Visual reference: https://impactbench.media.mit.edu/about. API reference: https://openrouter.ai/docs/api_reference/overview. Terms Apply is independent and has no MIT affiliation.
+
+### Learning from the money flow
+
+The property edition records each bank and player transfer. Select a player to see starting cash, rent collected, Start rewards, chance rewards, asset sales, purchases, houses, rent paid and tax. Cash reconciles as opening balance plus money in minus money out. Net worth adds property and house costs; selling to the bank realizes a half-value loss. Property inspection shows rent earned and a simple paid-visit payback example, without promising future visits.
+
+Pause and choose Next move to inspect a single bot decision. Changing playback pace preserves the current table. Demo players have distinct written strategies: Claude keeps cash, Gemini collects, Codex completes sets, Grok takes more building risk, and DeepSeek filters for rent relative to price. These are game personas, not measurements of the real models. Old saves recover their transactions by replaying retained moves; if the history is incomplete, accounting starts explicitly from the saved balance.

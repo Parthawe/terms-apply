@@ -3,7 +3,7 @@ import {readFile,writeFile,mkdir,rename,appendFile} from 'node:fs/promises';
 import {resolve,dirname,extname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomInt,timingSafeEqual} from 'node:crypto';
-import {startMatch,applyMove,botMove,observation,result,demoRoster} from './arena/game.mjs';
+import {startMatch,applyMove,botMove,observation,result,demoRoster,upgradeMatch} from './arena/game.mjs';
 import {catalog,modelMove,parseReply} from './arena/provider.mjs';
 const root=dirname(fileURLToPath(import.meta.url));
 // Keys are read on the server only. .env and data are never in the static route allowlist.
@@ -12,9 +12,10 @@ const apiKey=process.env.OPENROUTER_API_KEY||'',port=Number(process.env.PORT||87
 const publicOrigin=process.env.PUBLIC_ORIGIN||(process.env.RENDER_EXTERNAL_URL||''),adminToken=process.env.ADMIN_TOKEN||'';
 if(publicOrigin&&!adminToken)throw Error('PUBLIC_ORIGIN requires ADMIN_TOKEN to protect runner controls.');
 const dataDir=resolve(process.env.DATA_DIR||resolve(root,'data'));const stateFile=resolve(dataDir,'arena-state.json');await mkdir(dataDir,{recursive:true});
-let state={version:4,mode:'demo',running:true,status:'running',message:'Local strategy bots are playing. No model API calls are made.',interval:1500,roster:demoRoster,match:startMatch(demoRoster,1,randomInt(1,0x7fffffff)),history:[],totals:{},limits:{requestsPerDay:200,usdPerDay:1},usage:{date:new Date().toISOString().slice(0,10),requests:0,cost:0,unknownCosts:0},lastUpdated:new Date().toISOString()};
-try{const saved=JSON.parse(await readFile(stateFile,'utf8'));if(saved.version===4)state=saved;else if([2,3].includes(saved.version)){await writeFile(resolve(dataDir,'legacy-arena-state-v'+saved.version+'.json'),JSON.stringify(saved,null,2));state={...saved,version:4,match:startMatch(saved.roster.slice(0,5),saved.match.id+1,randomInt(1,0x7fffffff)),history:[],totals:{},running:saved.mode==='demo',status:saved.mode==='demo'?'running':'paused',message:saved.mode==='demo'?'Property edition ready. Local bots are playing.':'Property edition ready. Previous usage limits and ledger retained. Resume to start model play.'};}}catch{}
+let state={version:5,mode:'demo',running:true,status:'running',message:'Local strategy bots are playing. No model API calls are made.',interval:1500,roster:demoRoster,match:startMatch(demoRoster,1,randomInt(1,0x7fffffff)),history:[],totals:{},limits:{requestsPerDay:200,usdPerDay:1},usage:{date:new Date().toISOString().slice(0,10),requests:0,cost:0,unknownCosts:0},lastUpdated:new Date().toISOString()};
+try{const saved=JSON.parse(await readFile(stateFile,'utf8'));if([4,5].includes(saved.version))state={...saved,version:5,match:upgradeMatch(saved.match)};else if([2,3].includes(saved.version)){await writeFile(resolve(dataDir,'legacy-arena-state-v'+saved.version+'.json'),JSON.stringify(saved,null,2));state={...saved,version:5,match:startMatch(saved.roster.slice(0,5),saved.match.id+1,randomInt(1,0x7fffffff)),history:[],totals:{},running:saved.mode==='demo',status:saved.mode==='demo'?'running':'paused',message:saved.mode==='demo'?'Property edition ready. Local bots are playing.':'Property edition ready. Previous usage limits and ledger retained. Resume to start model play.'};}}catch{}
 if(state.mode==='demo'&&state.roster.map(p=>p.id).join()!==demoRoster.map(p=>p.id).join()){state.roster=demoRoster;state.match=startMatch(demoRoster,state.match.id+1,randomInt(1,0x7fffffff));state.history=[];state.totals={};}
+if(state.mode==='demo'){state.roster=state.roster.map(p=>demoRoster.find(d=>d.id===p.id)||p);state.match.players.forEach(p=>p.model=demoRoster.find(d=>d.id===p.model.id)||p.model);}
 if(state.mode==='real'&&!apiKey){state.running=false;state.status='disconnected';state.message='Add OPENROUTER_API_KEY to the server environment, then restart.';}
 let models=[],catalogError='',busy=false,clients=new Set(),timer,controlVersion=0;
 const colors=['#698f86','#c1866c','#8d82a3','#ad9d61','#7195b0','#a87584','#849661','#cc9b56'];
@@ -25,6 +26,9 @@ function pause(message,status='error'){state.running=false;state.status=status;s
 async function loadModels(){try{models=await catalog();catalogError='';}catch(e){catalogError=e.message;}broadcast();}
 function nextTable(){const number=state.match.id+1,offset=((number-1)*5)%state.roster.length;const roster=Array.from({length:Math.min(5,state.roster.length)},(_,i)=>state.roster[(offset+i)%state.roster.length]);return startMatch(roster,number,randomInt(1,0x7fffffff));}
 function schedule(){clearTimeout(timer);timer=setTimeout(tick,state.match.finishedAt?6000:state.interval);}
+async function recordMatch(){const r={...result(state.match),mode:state.mode};state.history.unshift(r);state.history=state.history.slice(0,100);for(const row of r.rows){const key=state.mode+':'+row.id;const t=state.totals[key]||{id:row.id,name:row.name,mode:state.mode,games:0,wins:0,tasks:0,open:0,incorrect:0,rejected:0};t.games++;t.wins+=r.winners.includes(row.id)?1:0;t.tasks+=row.tasks;t.wealth=(t.wealth||0)+row.netWorth;t.properties=(t.properties||0)+row.properties;t.open+=row.open;t.incorrect+=row.incorrect;t.rejected+=row.rejected;state.totals[key]=t;}
+    await writeFile(resolve(dataDir,`match-${state.match.id}.json`),JSON.stringify({result:r,match:state.match}));
+    await appendFile(resolve(dataDir,'matches.jsonl'),JSON.stringify({result:r,match:state.match})+'\n');state.message='Match finished. The next table starts in six seconds.';}
 async function tick(){if(busy)return;if(!state.running){schedule();return;}busy=true;broadcast();const version=controlVersion;
  try{
   if(state.match.finishedAt){state.match=nextTable();state.message=state.mode==='demo'?'New local-bot match.':'New OpenRouter match.';}
@@ -47,9 +51,7 @@ async function tick(){if(busy)return;if(!state.running){schedule();return;}busy=
    }
    state.match=applyMove(state.match,move.action,move.reason);
    const last=state.match.events.at(-1);if(last.rejected&&state.mode==='real')pause('Model selected an illegal move. Inspect the transcript, then resume.');
-   if(state.match.finishedAt){const r={...result(state.match),mode:state.mode};state.history.unshift(r);state.history=state.history.slice(0,100);for(const row of r.rows){const key=state.mode+':'+row.id;const t=state.totals[key]||{id:row.id,name:row.name,mode:state.mode,games:0,wins:0,tasks:0,open:0,incorrect:0,rejected:0};t.games++;t.wins+=r.winners.includes(row.id)?1:0;t.tasks+=row.tasks;t.wealth=(t.wealth||0)+row.netWorth;t.properties=(t.properties||0)+row.properties;t.open+=row.open;t.incorrect+=row.incorrect;t.rejected+=row.rejected;state.totals[key]=t;}
-    await writeFile(resolve(dataDir,`match-${state.match.id}.json`),JSON.stringify({result:r,match:state.match}));
-    await appendFile(resolve(dataDir,'matches.jsonl'),JSON.stringify({result:r,match:state.match})+'\n');state.message='Match finished. The next table starts in six seconds.';}
+   if(state.match.finishedAt)await recordMatch();
   }
  }catch(e){pause(e.message||'The runner stopped unexpectedly.');}
  finally{busy=false;try{await persist();}catch{pause('The match could not be saved. Check server disk permissions.');}broadcast();schedule();}
@@ -71,7 +73,7 @@ const server=http.createServer(async(req,res)=>{
    if(b.action==='pause'){state.running=false;state.status='paused';state.message='The runner is paused. No new API calls will be made.';}
    else if(b.action==='resume'){if(state.mode==='demo'&&state.roster.map(p=>p.id).join()!==demoRoster.map(p=>p.id).join()){state.roster=demoRoster;state.match=startMatch(demoRoster,state.match.id+1,randomInt(1,0x7fffffff));state.history=[];state.totals={};}
 if(state.mode==='real'&&!apiKey)return json(res,400,{error:'OPENROUTER_API_KEY is missing on the server.'});state.running=true;state.status='running';state.message=state.mode==='real'?'OpenRouter models are playing.':'Local strategy bots are playing.';}
-   else if(b.action==='configure'){
+   else if(b.action==='pace'){const pace=Number(b.interval);if(!Number.isFinite(pace)||pace<300||pace>60000)throw Error('Choose a valid pace.');state.interval=pace;}else if(b.action==='step'){if(state.running||state.mode!=='demo'||state.match.finishedAt)throw Error('Pause a demo game before taking one move.');const p=state.match.players[state.match.current],move=botMove(state.match,p);state.match=applyMove(state.match,move.action,move.reason);if(state.match.finishedAt)await recordMatch();}else if(b.action==='configure'){
     if(!['demo','real'].includes(b.mode))throw Error('Select a valid mode.');
     if(b.mode==='real'&&!apiKey)return json(res,400,{error:'Add OPENROUTER_API_KEY to the server environment and restart. No keys are entered in this page.'});
     const daily=Number(b.requestsPerDay),budget=Number(b.usdPerDay),interval=Number(b.interval);
