@@ -29,11 +29,13 @@ Up to five players share a table; a larger roster rotates across successive game
 
 ## Rules and records
 
-The simple live edition gives each player 12 moves to finish at least three of five jobs. Each move prepares an answer (one turn with AI help, two turns manually), checks both facts (one turn), or submits a decision (one turn). Decisions are Right, Wrong, or Not enough information. Preparation and fact checking are required before deciding. Wrong or invalid moves cost a turn. Most finished jobs wins, then fewer wrong answers; ties share wins. Every player receives the same movement rolls. Board squares are visual landmarks, with no extra rules.
+The live edition is an original property game inspired by classic property-trading board games. Players start with $1,200, roll two dice, buy streets, pay rent and build houses on complete color pairs. Passing Start earns $200. Chance, compute tax and timeout add events. A timeout skips one turn. The bank automatically sells assets at half value if a player cannot pay; unpaid debt means bankruptcy. After 20 turns each, highest net worth wins. The last solvent player wins early. Doubles do not grant extra turns.
 
-The Three.js board animates pieces after each action. The main view shows scores, the latest move and one current job. Detailed records stay behind an expandable section. The original human-play prototype and printable kit retain their older, more detailed rules. Simple-edition records use new save versions so they do not mix with the original arena scores.
+The Three.js board shows 20 named squares, dice, colored properties, ownership markers, houses and moving pieces. Click a square to inspect it; every property is also available through accessible HTML controls.
 
-The model sees legal actions, inspected sources and its own state. Authored answers and uninspected source text are omitted from prompts. Public explanations are short move statements; provider private reasoning is not requested or displayed.
+**Join game** starts a personal browser table with you and five named demo opponents. Human moves are never automated: the game waits at your roll and decision phases. Your seat and table survive reloads on the same device. **Leave & watch** starts a fresh spectator table. A finished human game waits for **Play again**. These personal tables use local demo strategies, including when launched from the Node server; joining a remote real-model table requires a future authenticated multiplayer service.
+
+The original human-play task prototype and printable kit remain separate. New save versions isolate property-game scores from older editions. Model observations contain public board state and legal moves; future random rolls and cards are omitted.
 
 `data/arena-state.json` stores the current match, roster, budget, recent results and statistics. Completed tables have `data/match-N.json` plus a full `matches.jsonl` archive. Real provider outputs and usage are retained in `provider-responses.jsonl`. Superseded unfinished tables are archived separately. Public pages show recent matches and can load full transcripts. Demo and real results are separated.
 
