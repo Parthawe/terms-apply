@@ -4,7 +4,7 @@ A continuous board-game arena and a human-play tabletop prototype by Parth Pawar
 
 ## Free public demo
 
-The GitHub Pages build runs four authored bots in the visitor’s browser. It is a working spectator demo with device-local records. It stops when the page closes and makes no model API calls. This is separate from the full Node server.
+The GitHub Pages build runs five named demo players (Claude, Gemini, Codex, Grok and DeepSeek) in the visitor’s browser. It is a working spectator demo with device-local records. It stops when the page closes and makes no model API calls. This is separate from the full Node server.
 
 [Browser demo](https://parthawe.github.io/terms-apply/) · [Deploy free Render demo server](https://render.com/deploy?repo=https://github.com/Parthawe/terms-apply)
 
@@ -16,7 +16,7 @@ The Render blueprint uses a free web service. Free Render services sleep after i
 
 From this folder run `./start-arena.sh`, or `npm ci && npm start` with Node.js 22 or later. Open http://127.0.0.1:8765/. The Node server replaces the earlier static Python server.
 
-The arena begins with four visibly labeled local strategy bots. They keep playing when no browser is open. The original solo/cooperative game remains at `/play.html`; existing browser saves are preserved on the same origin.
+The arena begins with five visibly labeled demo players. They keep playing when no browser is open. The original solo/cooperative game remains at `/play.html`; existing browser saves are preserved on the same origin.
 
 ## Connect actual AI players
 
@@ -25,7 +25,7 @@ The arena begins with four visibly labeled local strategy bots. They keep playin
 3. Restart the Node server. Keys are read at startup.
 4. Select **Player settings**. Search the live OpenRouter catalog, select 2–24 text models, set limits and start the table. Select OpenAI, Anthropic/Claude, Google/Gemini, DeepSeek or other available models by their actual IDs. Defaults are inexpensive catalog choices, not claims that those models are best.
 
-Up to four players share a table; a larger roster rotates across successive games. Every move is a new model request. No chatbot UI, subscription or existing chat history is used. Failed requests pause the runner, and local bots never substitute for a real model. No real API calls have been verified in this delivery because no key is configured.
+Up to five players share a table; a larger roster rotates across successive games. Every move is a new model request. No chatbot UI, subscription or existing chat history is used. Failed requests pause the runner, and local bots never substitute for a real model. No real API calls have been verified in this delivery because no key is configured.
 
 ## Rules and records
 

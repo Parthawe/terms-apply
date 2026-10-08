@@ -13,7 +13,8 @@ const publicOrigin=process.env.PUBLIC_ORIGIN||(process.env.RENDER_EXTERNAL_URL||
 if(publicOrigin&&!adminToken)throw Error('PUBLIC_ORIGIN requires ADMIN_TOKEN to protect runner controls.');
 const dataDir=resolve(process.env.DATA_DIR||resolve(root,'data'));const stateFile=resolve(dataDir,'arena-state.json');await mkdir(dataDir,{recursive:true});
 let state={version:3,mode:'demo',running:true,status:'running',message:'Local strategy bots are playing. No model API calls are made.',interval:1500,roster:demoRoster,match:startMatch(demoRoster,1,randomInt(1,0x7fffffff)),history:[],totals:{},limits:{requestsPerDay:200,usdPerDay:1},usage:{date:new Date().toISOString().slice(0,10),requests:0,cost:0,unknownCosts:0},lastUpdated:new Date().toISOString()};
-try{const saved=JSON.parse(await readFile(stateFile,'utf8'));if(saved.version===3)state=saved;else if(saved.version===2){await writeFile(resolve(dataDir,'legacy-arena-state-v2.json'),JSON.stringify(saved,null,2));state={...saved,version:3,match:startMatch(saved.roster.slice(0,4),saved.match.id+1,randomInt(1,0x7fffffff)),history:[],totals:{},running:saved.mode==='demo',status:saved.mode==='demo'?'running':'paused',message:saved.mode==='demo'?'Simple edition ready. Local bots are playing.':'Simple edition ready. Previous usage limits and ledger retained. Resume to start model play.'};}}catch{}
+try{const saved=JSON.parse(await readFile(stateFile,'utf8'));if(saved.version===3)state=saved;else if(saved.version===2){await writeFile(resolve(dataDir,'legacy-arena-state-v2.json'),JSON.stringify(saved,null,2));state={...saved,version:3,match:startMatch(saved.roster.slice(0,5),saved.match.id+1,randomInt(1,0x7fffffff)),history:[],totals:{},running:saved.mode==='demo',status:saved.mode==='demo'?'running':'paused',message:saved.mode==='demo'?'Simple edition ready. Local bots are playing.':'Simple edition ready. Previous usage limits and ledger retained. Resume to start model play.'};}}catch{}
+if(state.mode==='demo'&&state.roster.map(p=>p.id).join()!==demoRoster.map(p=>p.id).join()){state.roster=demoRoster;state.match=startMatch(demoRoster,state.match.id+1,randomInt(1,0x7fffffff));state.history=[];state.totals={};}
 if(state.mode==='real'&&!apiKey){state.running=false;state.status='disconnected';state.message='Add OPENROUTER_API_KEY to the server environment, then restart.';}
 let models=[],catalogError='',busy=false,clients=new Set(),timer,controlVersion=0;
 const colors=['#698f86','#c1866c','#8d82a3','#ad9d61','#7195b0','#a87584','#849661','#cc9b56'];
@@ -22,7 +23,7 @@ async function persist(){state.lastUpdated=new Date().toISOString();await writeF
 function broadcast(){const msg=`data: ${JSON.stringify(publicState())}\n\n`;for(const c of clients)c.write(msg);}
 function pause(message,status='error'){state.running=false;state.status=status;state.message=message;}
 async function loadModels(){try{models=await catalog();catalogError='';}catch(e){catalogError=e.message;}broadcast();}
-function nextTable(){const number=state.match.id+1,offset=((number-1)*4)%state.roster.length;const roster=Array.from({length:Math.min(4,state.roster.length)},(_,i)=>state.roster[(offset+i)%state.roster.length]);return startMatch(roster,number,randomInt(1,0x7fffffff));}
+function nextTable(){const number=state.match.id+1,offset=((number-1)*5)%state.roster.length;const roster=Array.from({length:Math.min(5,state.roster.length)},(_,i)=>state.roster[(offset+i)%state.roster.length]);return startMatch(roster,number,randomInt(1,0x7fffffff));}
 function schedule(){clearTimeout(timer);timer=setTimeout(tick,state.match.finishedAt?6000:state.interval);}
 async function tick(){if(busy)return;if(!state.running){schedule();return;}busy=true;broadcast();const version=controlVersion;
  try{
@@ -68,7 +69,8 @@ const server=http.createServer(async(req,res)=>{
    if(busy)return json(res,409,{error:'A move is in flight. Try again when it finishes.'});
    const b=await body(req);
    if(b.action==='pause'){state.running=false;state.status='paused';state.message='The runner is paused. No new API calls will be made.';}
-   else if(b.action==='resume'){if(state.mode==='real'&&!apiKey)return json(res,400,{error:'OPENROUTER_API_KEY is missing on the server.'});state.running=true;state.status='running';state.message=state.mode==='real'?'OpenRouter models are playing.':'Local strategy bots are playing.';}
+   else if(b.action==='resume'){if(state.mode==='demo'&&state.roster.map(p=>p.id).join()!==demoRoster.map(p=>p.id).join()){state.roster=demoRoster;state.match=startMatch(demoRoster,state.match.id+1,randomInt(1,0x7fffffff));state.history=[];state.totals={};}
+if(state.mode==='real'&&!apiKey)return json(res,400,{error:'OPENROUTER_API_KEY is missing on the server.'});state.running=true;state.status='running';state.message=state.mode==='real'?'OpenRouter models are playing.':'Local strategy bots are playing.';}
    else if(b.action==='configure'){
     if(!['demo','real'].includes(b.mode))throw Error('Select a valid mode.');
     if(b.mode==='real'&&!apiKey)return json(res,400,{error:'Add OPENROUTER_API_KEY to the server environment and restart. No keys are entered in this page.'});
@@ -77,7 +79,7 @@ const server=http.createServer(async(req,res)=>{
     let roster=demoRoster;if(b.mode==='real'){if(!Array.isArray(b.models)||b.models.length<2||b.models.length>24||new Set(b.models).size!==b.models.length)throw Error('Select 2 to 24 distinct models.');roster=b.models.map((id,i)=>{const model=models.find(m=>m.id===id);if(!model)throw Error('A selected model is unavailable in the current catalog.');return {...model,color:colors[i%colors.length]};});}
     // Archive incomplete tables instead of mixing model/demo histories.
     await appendFile(resolve(dataDir,'abandoned-tables.jsonl'),JSON.stringify({time:new Date().toISOString(),mode:state.mode,match:state.match})+'\n');
-    state.mode=b.mode;state.roster=roster;state.limits={requestsPerDay:daily,usdPerDay:budget};state.interval=interval;state.match=startMatch(roster.slice(0,4),state.match.id+1,randomInt(1,0x7fffffff));state.running=true;state.status='running';state.message=b.mode==='real'?'OpenRouter models are playing.':'Local strategy bots are playing. No model API calls are made.';
+    state.mode=b.mode;state.roster=roster;state.limits={requestsPerDay:daily,usdPerDay:budget};state.interval=interval;state.match=startMatch(roster.slice(0,5),state.match.id+1,randomInt(1,0x7fffffff));state.running=true;state.status='running';state.message=b.mode==='real'?'OpenRouter models are playing.':'Local strategy bots are playing. No model API calls are made.';
    }else throw Error('Unknown control action.');
    controlVersion++;await persist();broadcast();schedule();return json(res,200,{ok:true});
   }
