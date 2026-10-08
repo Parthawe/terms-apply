@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+data/
+tmp/
+.DS_Store
+node_modules/
+_site/
+.site-build/
