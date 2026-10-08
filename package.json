@@ -4,10 +4,12 @@
   "private": true,
   "description": "A continuous board-game arena about AI services, evidence and obligations.",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test engine.test.mjs arena/arena.test.mjs arena/server.test.mjs",
+    "test": "node --test engine.test.mjs arena/*.test.mjs",
     "build:pages": "node scripts/build-pages.mjs"
   }
 }

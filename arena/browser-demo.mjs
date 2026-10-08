@@ -17,5 +17,5 @@ export function browserDemo(){
  else{status=404;body={error:'Not available in browser demo.'};}
  return {ok:status===200,status,json:async()=>structuredClone(body)};
  }
- singleton={stream,request};queueMicrotask(emit);schedule();return singleton;
+ singleton={stream,request,dispose:()=>{state.running=false;clearTimeout(timer);}};queueMicrotask(emit);schedule();return singleton;
 }
