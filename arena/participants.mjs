@@ -1,0 +1,3 @@
+import {demoRoster,humanPlayer} from './game.mjs';
+export function participantRoster(ids,includeHuman=false){if(!Array.isArray(ids)||ids.length<1||ids.length>demoRoster.length||new Set(ids).size!==ids.length||ids.some(id=>!demoRoster.some(p=>p.id===id)))throw Error('Choose distinct players from the five names.');if(ids.length+(includeHuman?1:0)<2)throw Error('Choose at least two players, or one player and yourself.');const bots=demoRoster.filter(p=>ids.includes(p.id));return includeHuman?[humanPlayer,...bots]:bots;}
+export function withoutHuman(roster){const bots=roster.filter(p=>!p.human);return bots.length>=2?bots:[...bots,demoRoster.find(p=>!bots.some(b=>b.id===p.id))];}

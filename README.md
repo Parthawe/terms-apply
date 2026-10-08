@@ -78,3 +78,7 @@ Pause and choose Next move to inspect a single bot decision. Changing playback p
 “Learn step by step” opens six practice exercises with a prediction, worked answer, limits on the claim and a task to try on the live board. They cover cash versus wealth, transfers, cash reserves, marginal rent from houses, chance and fair comparisons, and AI attribution. The house exercise lets learners vary paying visitors and compare extra rent with the upgrade cost. Demo playback pauses while the lessons are open and restores its previous playback state on exit; the match is preserved. Real-model operators continue to control their shared runner separately.
 
 The live decision preview compares buying an available street with retaining cash. The practice exercises use fictional examples; they do not measure learning outcomes or real-model performance.
+
+### Choosing participants
+
+Choose players lets you select individual demo names, a count, or all five. Include me adds a human seat; a table needs at least two participants total. Replays, reloads, pace changes and automatic next games keep the roster. Leaving a one-opponent personal game adds a second bot so the spectator game remains playable. Participant changes start a fresh table. The public browser game supports up to six seats: five named demo strategies and you.
