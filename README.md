@@ -90,3 +90,7 @@ The board uses a Monopoly-inspired mint surface, classic property color bands, a
 Brand marks are hosted locally from the sources documented in assets/brands/SOURCES.md. They identify demo personas; the page explicitly distinguishes these from verified model calls and does not imply brand endorsement. Codex uses OpenAI’s mark. No Monopoly logo or official game artwork is used.
 
 The game table keeps the live turn separate from player inspection. On phones, turn controls sit above the board. “Next move” pauses automatic play and advances one demo action. Player payments and lessons appear below the board; detailed ledgers and the money comparison open on demand. Tokens follow dice movement around the perimeter; forced relocations move directly to the destination.
+
+## News edition
+
+New games snapshot five sourced AI stories checked on October 8, 2026. News squares draw from this deck; any player can receive any card. The dated facts are separate from fictional cash effects, which reconcile through the same ledger as other chance payments. Saved games keep their own deck, and older saves finish under their earlier chance rules. This is an editorial snapshot, not an automatically refreshed feed or a ranking of real models. Source links and all five authored player profiles are available from the game.
