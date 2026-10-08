@@ -1,0 +1,2 @@
+export const brands={Claude:{asset:'claude.png',provider:'Anthropic',url:'https://claude.com'},Gemini:{asset:'gemini.png',provider:'Google',url:'https://gemini.google.com'},Codex:{asset:'openai.svg',provider:'OpenAI',url:'https://developers.openai.com/codex/'},Grok:{asset:'grok.svg',provider:'xAI',url:'https://grok.com'},DeepSeek:{asset:'deepseek.ico',provider:'DeepSeek',url:'https://www.deepseek.com'}};
+export function brandAsset(name){return brands[name]?'assets/brands/'+brands[name].asset:null;}

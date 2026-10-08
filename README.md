@@ -82,3 +82,9 @@ The live decision preview compares buying an available street with retaining cas
 ### Choosing participants
 
 Choose players lets you select individual demo names, a count, or all five. Include me adds a human seat; a table needs at least two participants total. Replays, reloads, pace changes and automatic next games keep the roster. Leaving a one-opponent personal game adds a second bot so the spectator game remains playable. Participant changes start a fresh table. The public browser game supports up to six seats: five named demo strategies and you.
+
+### Three.js board and brand references
+
+The board uses a Monopoly-inspired mint surface, classic property color bands, a red Terms Apply title, metallic geometric tokens and roofed green houses. Angled and Top view controls change the camera without changing the game. Color is supported by visible player names and property labels.
+
+Brand marks are hosted locally from the sources documented in assets/brands/SOURCES.md. They identify demo personas; the page explicitly distinguishes these from verified model calls and does not imply brand endorsement. Codex uses OpenAI’s mark. No Monopoly logo or official game artwork is used.
