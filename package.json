@@ -10,6 +10,14 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test engine.test.mjs arena/*.test.mjs",
-    "build:pages": "node scripts/build-pages.mjs"
+    "build:pages": "node scripts/build-pages.mjs",
+    "build:client": "node scripts/build-client.mjs",
+    "prestart": "npm run build:client"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
   }
 }

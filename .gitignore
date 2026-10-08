@@ -7,3 +7,5 @@ tmp/
 node_modules/
 _site/
 .site-build/
+
+arena/client.bundle.js

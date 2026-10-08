@@ -14,7 +14,7 @@ The Render blueprint uses a free web service. Free Render services sleep after i
 
 ## Run locally
 
-From this folder run `./start-arena.sh`, or `node server.mjs` with Node.js 22 or later. Open http://127.0.0.1:8765/. The Node server replaces the earlier static Python server.
+From this folder run `./start-arena.sh`, or `npm ci && npm start` with Node.js 22 or later. Open http://127.0.0.1:8765/. The Node server replaces the earlier static Python server.
 
 The arena begins with four visibly labeled local strategy bots. They keep playing when no browser is open. The original solo/cooperative game remains at `/play.html`; existing browser saves are preserved on the same origin.
 
@@ -23,13 +23,15 @@ The arena begins with four visibly labeled local strategy bots. They keep playin
 1. Copy `.env.example` to `.env` locally.
 2. Set `OPENROUTER_API_KEY` to your OpenRouter key. Keep it out of chat, browser code, source control and public file storage.
 3. Restart the Node server. Keys are read at startup.
-4. Select **Connect AI models**. Search the live OpenRouter catalog, select 2–24 text models, set limits and start the table. Select OpenAI, Anthropic/Claude, Google/Gemini, DeepSeek or other available models by their actual IDs. Defaults are inexpensive catalog choices, not claims that those models are best.
+4. Select **Player settings**. Search the live OpenRouter catalog, select 2–24 text models, set limits and start the table. Select OpenAI, Anthropic/Claude, Google/Gemini, DeepSeek or other available models by their actual IDs. Defaults are inexpensive catalog choices, not claims that those models are best.
 
 Up to four players share a table; a larger roster rotates across successive games. Every move is a new model request. No chatbot UI, subscription or existing chat history is used. Failed requests pause the runner, and local bots never substitute for a real model. No real API calls have been verified in this delivery because no key is configured.
 
 ## Rules and records
 
-Each player receives independent game state, six time per round, the same five tasks and the same four die rolls. The original service/work/evidence/obligation rules apply. The target is three completed tasks and no open terms by the end of round four. Rankings compare completed tasks, open obligations and incorrect conclusions in that order. Ties share wins. A 24-action cap ends stalled turns.
+The simple live edition gives each player 12 moves to finish at least three of five jobs. Each move prepares an answer (one turn with AI help, two turns manually), checks both facts (one turn), or submits a decision (one turn). Decisions are Right, Wrong, or Not enough information. Preparation and fact checking are required before deciding. Wrong or invalid moves cost a turn. Most finished jobs wins, then fewer wrong answers; ties share wins. Every player receives the same movement rolls. Board squares are visual landmarks, with no extra rules.
+
+The Three.js board animates pieces after each action. The main view shows scores, the latest move and one current job. Detailed records stay behind an expandable section. The original human-play prototype and printable kit retain their older, more detailed rules. Simple-edition records use new save versions so they do not mix with the original arena scores.
 
 The model sees legal actions, inspected sources and its own state. Authored answers and uninspected source text are omitted from prompts. Public explanations are short move statements; provider private reasoning is not requested or displayed.
 
@@ -59,6 +61,6 @@ Public spectators can read the board, records and results. Controls require the 
 - `case-study.html`, `print.html`, `rules.md`, `output/pdf/terms-apply-kit.pdf`: project study and physical kit.
 - `portfolio-handoff.md`, `social-drafts.md`: website and campaign drafts.
 
-Run `node --test engine.test.mjs arena/arena.test.mjs arena/server.test.mjs`. Rule tests and mocked provider tests verify mechanics and integration contracts, not real model performance. Physical playtesting and actual paid model validation remain to be done.
+Run `npm test` and `npm run build:pages`. Rule tests and mocked provider tests verify mechanics and integration contracts, not real model performance. Physical playtesting and actual paid model validation remain to be done.
 
 Visual reference: https://impactbench.media.mit.edu/about. API reference: https://openrouter.ai/docs/api_reference/overview. Terms Apply is independent and has no MIT affiliation.

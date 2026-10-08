@@ -12,8 +12,8 @@ const apiKey=process.env.OPENROUTER_API_KEY||'',port=Number(process.env.PORT||87
 const publicOrigin=process.env.PUBLIC_ORIGIN||(process.env.RENDER_EXTERNAL_URL||''),adminToken=process.env.ADMIN_TOKEN||'';
 if(publicOrigin&&!adminToken)throw Error('PUBLIC_ORIGIN requires ADMIN_TOKEN to protect runner controls.');
 const dataDir=resolve(process.env.DATA_DIR||resolve(root,'data'));const stateFile=resolve(dataDir,'arena-state.json');await mkdir(dataDir,{recursive:true});
-let state={version:2,mode:'demo',running:true,status:'running',message:'Local strategy bots are playing. No model API calls are made.',interval:1500,roster:demoRoster,match:startMatch(demoRoster,1,randomInt(1,0x7fffffff)),history:[],totals:{},limits:{requestsPerDay:200,usdPerDay:1},usage:{date:new Date().toISOString().slice(0,10),requests:0,cost:0,unknownCosts:0},lastUpdated:new Date().toISOString()};
-try{const saved=JSON.parse(await readFile(stateFile,'utf8'));if(saved.version===2)state=saved;}catch{}
+let state={version:3,mode:'demo',running:true,status:'running',message:'Local strategy bots are playing. No model API calls are made.',interval:1500,roster:demoRoster,match:startMatch(demoRoster,1,randomInt(1,0x7fffffff)),history:[],totals:{},limits:{requestsPerDay:200,usdPerDay:1},usage:{date:new Date().toISOString().slice(0,10),requests:0,cost:0,unknownCosts:0},lastUpdated:new Date().toISOString()};
+try{const saved=JSON.parse(await readFile(stateFile,'utf8'));if(saved.version===3)state=saved;else if(saved.version===2){await writeFile(resolve(dataDir,'legacy-arena-state-v2.json'),JSON.stringify(saved,null,2));state={...saved,version:3,match:startMatch(saved.roster.slice(0,4),saved.match.id+1,randomInt(1,0x7fffffff)),history:[],totals:{},running:saved.mode==='demo',status:saved.mode==='demo'?'running':'paused',message:saved.mode==='demo'?'Simple edition ready. Local bots are playing.':'Simple edition ready. Previous usage limits and ledger retained. Resume to start model play.'};}}catch{}
 if(state.mode==='real'&&!apiKey){state.running=false;state.status='disconnected';state.message='Add OPENROUTER_API_KEY to the server environment, then restart.';}
 let models=[],catalogError='',busy=false,clients=new Set(),timer,controlVersion=0;
 const colors=['#698f86','#c1866c','#8d82a3','#ad9d61','#7195b0','#a87584','#849661','#cc9b56'];
@@ -55,7 +55,7 @@ async function tick(){if(busy)return;if(!state.running){schedule();return;}busy=
 }
 const json=(res,status,body)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body));};
 async function body(req){let txt='';for await(const chunk of req){txt+=chunk;if(txt.length>20000)throw Error('Request is too large.');}return JSON.parse(txt||'{}');}
-const allowed=new Set(['index.html','play.html','app.mjs','style.css','content.mjs','engine.mjs','case-study.html','print.html','rules.md','arena/client.mjs','arena/arena.css','arena/game.mjs','arena/provider.mjs','arena/browser-demo.mjs','assets/board.svg','output/pdf/terms-apply-kit.pdf']);
+const allowed=new Set(['index.html','play.html','app.mjs','style.css','content.mjs','engine.mjs','case-study.html','print.html','rules.md','arena/client.mjs','arena/client.bundle.js','arena/arena.css','arena/game.mjs','arena/provider.mjs','arena/browser-demo.mjs','assets/board.svg','output/pdf/terms-apply-kit.pdf']);
 const types={'.html':'text/html','.css':'text/css','.mjs':'text/javascript','.svg':'image/svg+xml','.pdf':'application/pdf','.md':'text/plain'};
 const server=http.createServer(async(req,res)=>{
  try{

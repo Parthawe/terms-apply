@@ -5,7 +5,7 @@ services:
     name: terms-apply
     runtime: node
     plan: free
-    buildCommand: npm test
+    buildCommand: npm ci && npm test && npm run build:client
     startCommand: npm start
     healthCheckPath: /health
     envVars:

@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 cd "$(dirname "$0")"
+if [ ! -d node_modules ]; then
+  npm ci
+fi
+npm run build:client
 if command -v node >/dev/null 2>&1; then
   exec node server.mjs
 fi

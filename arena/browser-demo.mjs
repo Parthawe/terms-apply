@@ -1,10 +1,10 @@
 import {startMatch,applyMove,botMove,result,demoRoster} from './game.mjs';
-const storageKey='terms-apply-browser-demo-v1';
+const storageKey='terms-apply-browser-demo-v2';
 let singleton;
 export function browserDemo(){
  if(singleton)return singleton;
- let state={version:1,browserDemo:true,mode:'demo',running:true,status:'running',connected:false,thinking:false,requiresAdmin:false,interval:1500,roster:demoRoster,match:startMatch(demoRoster,1,Math.floor(Math.random()*1e8)),history:[],totals:{},limits:{requestsPerDay:200,usdPerDay:1},usage:{requests:0,cost:0,unknownCosts:0},message:'This browser runs the demo. Play stops when the page closes.'};
- try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved?.version===1&&saved.browserDemo)state=saved;}catch{}
+ let state={version:2,browserDemo:true,mode:'demo',running:true,status:'running',connected:false,thinking:false,requiresAdmin:false,interval:1500,roster:demoRoster,match:startMatch(demoRoster,1,Math.floor(Math.random()*1e8)),history:[],totals:{},limits:{requestsPerDay:200,usdPerDay:1},usage:{requests:0,cost:0,unknownCosts:0},message:'This browser runs the demo. Play stops when the page closes.'};
+ try{const saved=JSON.parse(localStorage.getItem(storageKey));if(saved?.version===2&&saved.browserDemo)state=saved;}catch{}
  const stream={onmessage:null,onerror:null};let timer;
  const emit=()=>{try{localStorage.setItem(storageKey,JSON.stringify(state));}catch{}stream.onmessage?.({data:JSON.stringify(state)});};
  const schedule=()=>{clearTimeout(timer);timer=setTimeout(tick,state.match.finishedAt?6000:state.interval);};
