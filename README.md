@@ -88,3 +88,5 @@ Choose players lets you select individual demo names, a count, or all five. Incl
 The board uses a Monopoly-inspired mint surface, classic property color bands, a red Terms Apply title, metallic geometric tokens and roofed green houses. Angled and Top view controls change the camera without changing the game. Color is supported by visible player names and property labels.
 
 Brand marks are hosted locally from the sources documented in assets/brands/SOURCES.md. They identify demo personas; the page explicitly distinguishes these from verified model calls and does not imply brand endorsement. Codex uses OpenAI’s mark. No Monopoly logo or official game artwork is used.
+
+The game table keeps the live turn separate from player inspection. On phones, turn controls sit above the board. “Next move” pauses automatic play and advances one demo action. Player payments and lessons appear below the board; detailed ledgers and the money comparison open on demand. Tokens follow dice movement around the perimeter; forced relocations move directly to the destination.
