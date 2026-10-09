@@ -9,7 +9,7 @@ For each card record its stable ID, event date, category, status, headline, prim
 Existing mechanics:
 
 - `cash`: a bounded, explicitly authored transfer. Funding is labeled capital rather than earned revenue. A secondary sale can have zero company cash effect.
-- `ipo`: $200 gross capital in, $80 fees out, $120 net capital. These are fictional teaching amounts, not the issuer's real proceeds. Shares, dilution and prices are not simulated.
+- `ipo`: $200 gross capital in, $10 fees out, $190 net capital. These are fictional teaching amounts, not the issuer's real proceeds. Shares, dilution and prices are not simulated.
 - `portfolio-cost`: $20 recovery cost per owned street, with a $20 minimum. The player’s actual cash transfer is computed at draw time.
 
 Keep mechanics and their bounds unchanged during editorial updates. Changes to mechanics require a separately versioned rule change and tests. The current new-match version is `quick-v2`; `quick-v1` saves retain flat card payments. Each new match snapshots the deck, checked date and edition. Never rewrite saved matches or alter news partway through a match. Both demo and real models use the same deck and local referee. Model requests remain limited to purchase and building decisions.
