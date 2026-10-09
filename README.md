@@ -1,96 +1,68 @@
 # Terms Apply
 
-A continuous board-game arena and a human-play tabletop prototype by Parth Pawar.
+A short property game by Parth Pawar. Play against written demo strategies or connect OpenRouter for a private match against real models.
 
-## Free public demo
+[Play the game](https://parthawe.github.io/terms-apply/) · [Key handling and privacy](https://parthawe.github.io/terms-apply/privacy.html)
 
-The GitHub Pages build runs five named demo players (Claude, Gemini, Codex, Grok and DeepSeek) in the visitor’s browser. It is a working spectator demo with device-local records. It stops when the page closes and makes no model API calls. This is separate from the full Node server.
+## Play
 
-[Browser demo](https://parthawe.github.io/terms-apply/) · [Deploy free Render demo server](https://render.com/deploy?repo=https://github.com/Parthawe/terms-apply)
+Choose **Play free demo** to start with you, Claude and Gemini. Choose **Opponents** to select one to five opponents. Demo names identify authored game personas, not real model calls or measured brand behavior.
 
-GitHub Actions tests the game/server and publishes only an explicit public-file allowlist. Secrets, server data and internal notes are excluded from Pages.
+Everyone starts with $1,200. Roll locally, buy the street you reach or keep your cash. Rent, tax, news payments and turn advancement happen automatically. Color pairs double rent and unlock optional $100 houses: one per street, one building decision per turn. Passing Start pays $200. Timeout skips one turn. Insolvency sells assets back at half value; unpaid debt means bankruptcy. After ten turns each, highest cash plus original property and house value wins. The last solvent player wins early. Doubles do not grant extra turns.
 
-The Render blueprint uses a free web service. Free Render services sleep after inactivity and have ephemeral storage, so this option does not promise 24/7 operation or permanent records. Hosting can be free; paid model calls are separate. Render requires your account and private runtime key setup. See [Render free service limits](https://render.com/docs/free).
+The Three.js board uses familiar property-game colors and locally hosted brand marks. Phones default to the top view. Cash and street counts remain beside the board; **Details** contains property information, cash ledgers, strategies, sourced news and rules. Closing Details restores prior play. A finished match waits for an explicit Rematch or Change opponents action.
 
-## Run locally
+News is a curated snapshot checked October 8, 2026. Factual stories link to their sources; their cash effects are fictional and apply equally to whoever draws them. Each match preserves its deck. Results describe this game, not general AI ability. Terms Apply has no MIT, Monopoly or model-provider affiliation.
 
-From this folder run `./start-arena.sh`, or `npm ci && npm start` with Node.js 22 or later. Open http://127.0.0.1:8765/. The Node server replaces the earlier static Python server.
+## Private real AI matches
 
-The arena begins with five visibly labeled demo players. They keep playing when no browser is open. The original solo/cooperative game remains at `/play.html`; existing browser saves are preserved on the same origin.
+Choose **Play real AI**, then **Connect OpenRouter** (PKCE) or **Paste an existing key instead**. Validation calls `GET /api/v1/key`, without a paid completion. Keys are retained only in the credential controller's memory and sent directly from the browser to OpenRouter over HTTPS. They are excluded from game saves, exports, URLs, logs and browser storage. Disconnect clears the key and aborts outstanding requests; reloading requires reconnection. This does not revoke a key at OpenRouter.
 
-## Connect actual AI players
+PKCE temporarily stores only its verifier, callback nonce, creation time and callback address in session storage. State expires after ten minutes, is consumed once, and callback parameters are removed from the address bar before the exchange. Cancelled, expired or mismatched callbacks cannot connect.
 
-1. Copy `.env.example` to `.env` locally.
-2. Set `OPENROUTER_API_KEY` to your OpenRouter key. Keep it out of chat, browser code, source control and public file storage.
-3. Restart the Node server. Keys are read at startup.
-4. Select **Player settings**. Search the live OpenRouter catalog, select 2–24 text models, set limits and start the table. Select OpenAI, Anthropic/Claude, Google/Gemini, DeepSeek or other available models by their actual IDs. Defaults are inexpensive catalog choices, not claims that those models are best.
+The public catalog supplies models and token prices. Each brand defaults to its cheapest eligible standard text model with structured responses and bounded output. Preview, experimental, specialized multi-agent, safeguard, image-output and audio-output variants are excluded. Setup shows exact model IDs and prices; OpenAI players display their actual model names, with Codex reserved for Codex models. Selection is an eligibility and price filter, not a quality recommendation.
 
-Up to five players share a table; a larger roster rotates across successive games. Every move is a new model request. No chatbot UI, subscription or existing chat history is used. Failed requests pause the runner, and local bots never substitute for a real model. No real API calls have been verified in this delivery because no key is configured.
+AI dice are local. Only purchase and optional building decisions call a model. Requests have a 500-token output bound, strict JSON schema, required parameter support, provider price ceilings and disabled provider fallback. The application reserves a conservative cost estimate before dispatch and reconciles OpenRouter's reported cost afterward. Model explanations are escaped and credential patterns redacted before saving.
 
-## Rules and records
+The default match threshold is **$0.25**, adjustable before starting, with **80 requests maximum**. API spending is separate from fictional dollars. A threshold is an application stop condition, not a guaranteed billing cap: provider pricing, interrupted requests or incomplete usage can make billing uncertain. Set [provider-side key limits](https://openrouter.ai/settings/keys) and check [OpenRouter activity](https://openrouter.ai/activity). Failures, missing costs, wrong models and invalid actions pause the match. No silent bot substitution, automatic paid retry or automatic paid rematch occurs. Explicit Resume retries a recoverable decision; unresolved billing blocks resume.
 
-The live edition is an original property game inspired by classic property-trading board games. Players start with $1,200, roll two dice, buy streets, pay rent and build houses on complete color pairs. Passing Start earns $200. Chance, compute tax and timeout add events. A timeout skips one turn. The bank automatically sells assets at half value if a player cannot pay; unpaid debt means bankruptcy. After 20 turns each, highest net worth wins. The last solvent player wins early. Doubles do not grant extra turns.
+Saved private matches reopen paused and preserve `quick-v1` rules, turn limits, selected model IDs, the news snapshot and a credential-free usage record. An in-flight reservation recovered after reload is treated as unresolved billing. Earlier demo saves and the shared operator runner retain their original twenty-turn, three-house rules.
 
-The Three.js board shows 20 named squares, dice, colored properties, ownership markers, houses and moving pieces. Click a square to inspect it; every property is also available through accessible HTML controls.
+**Verification:** automated tests use mocked credentials and provider responses. The public catalog and browser demo have been checked. A real-key paid smoke test has not been performed; the UI states that limitation.
 
-**Join game** starts a personal browser table with you and five named demo opponents. Human moves are never automated: the game waits at your roll and decision phases. Your seat and table survive reloads on the same device. **Leave & watch** starts a fresh spectator table. A finished human game waits for **Play again**. These personal tables use local demo strategies, including when launched from the Node server; joining a remote real-model table requires a future authenticated multiplayer service.
+## Develop and publish
 
-The original human-play task prototype and printable kit remain separate. New save versions isolate property-game scores from older editions. Model observations contain public board state and legal moves; future random rolls and cards are omitted.
+Use Node.js 22 or later:
 
-`data/arena-state.json` stores the current match, roster, budget, recent results and statistics. Completed tables have `data/match-N.json` plus a full `matches.jsonl` archive. Real provider outputs and usage are retained in `provider-responses.jsonl`. Superseded unfinished tables are archived separately. Public pages show recent matches and can load full transcripts. Demo and real results are separated.
+```sh
+npm ci
+npm test
+npm run build:pages
+npm start
+```
 
-A graceful restart preserves the current table and running/paused state. A stop during a real in-flight request pauses on restart for inspection. Run only one worker per data directory; files are not a multi-worker database.
+The browser game is at `http://127.0.0.1:8765/`. GitHub Actions runs checks and publishes an explicit public-file allowlist to GitHub Pages. Three.js and the client are bundled locally. The entry page restricts scripts to this origin and connections to this origin and OpenRouter. Secrets, operator files and runtime data are excluded from Pages.
 
-## Usage limits
+- `arena/quick-game.mjs`: finite beginner rules layered on the existing referee.
+- `arena/private-runner.mjs`: private demo and model match orchestration, budget reservations and saves.
+- `arena/credentials.mjs`: connect, validate, disconnect, PKCE and authenticated requests; no serializable credentials.
+- `arena/private-client.mjs`, `arena/play.css`, `index.html`: playing, setup, Details and results.
+- `arena/board3d.mjs`: shared Three.js board and responsive camera fitting.
+- `arena/private-play.test.mjs`: rules, accounting, secret exclusion, PKCE, reload, disconnect, duplication, cost and model failure tests.
+- `privacy.html`: accurate key-handling and game conditions.
 
-The default is 200 API requests and USD 1 per UTC day. Both limits apply to this runner, not to the entire OpenRouter account. A conservative per-call token-price reservation is recorded before sending a request and replaced with reported provider cost afterward. Failed or interrupted requests retain the reservation. Catalog prices can change and this is not a provider-enforced account spending cap; set an account/key cap in OpenRouter as well. Missing cost data pauses the runner for ledger review. No other provider calls are made by local bots; fetching the public model catalog needs no key.
+### Explicit real-key smoke test
 
-After a limit is reached, resume on a new UTC day or adjust the limit. If a response omitted cost, compare the OpenRouter ledger and reconcile `usage.cost`, `usage.estimatedCost` and `usage.unknownCosts` in the saved state with the server stopped before resuming. Do not erase usage just to bypass a limit.
+On the published HTTPS site, connect a disposable inference key with a small provider-side limit. Confirm validation does not create a completion. Start a one-opponent match, roll and make your decision, then wait for the opponent's first genuine purchase/building decision. Confirm its exact model, legal move and cost against OpenRouter activity. Disconnect, inspect the exported record for key exclusion, reload and verify reconnection is required. Do not mark paid play verified until this passes. Never paste the key into chat or commit it.
 
-## Public 24/7 deployment
+## Separate shared operator arena
 
-An always-on server with persistent storage is required. This local computer stops serving when it sleeps or the process stops. Nothing has been deployed to designwhich.works.
+`npm start` also runs the original shared server independently of private browser matches. Its UI is at `/operator.html`; its matches continue when the browser closes, while the Node process remains awake. Configure `.env` from `.env.example`, with `OPENROUTER_API_KEY` read only by the server. Public deployments require `ADMIN_TOKEN` and `PUBLIC_ORIGIN`; operator controls retain their token in page memory. These server credentials never enter the private browser game.
 
-`Dockerfile` and `compose.yaml` provide one persistent Node worker. On an always-on host, create a private `.env` with the OpenRouter key, an operator `ADMIN_TOKEN` and `PUBLIC_ORIGIN=https://your-arena-domain`. Ensure the mounted `data` folder is writable by the container's `node` user (UID 1000). Run `docker compose up -d --build` behind your HTTPS reverse proxy, passing the public Host header and forwarding `/api/events` without buffering. Keep the local container port bound to 127.0.0.1. Mount and back up the data folder.
+The shared runner retains its original twenty-turn rules, server ledger, archives, provider responses and daily limits (200 requests / $1 by default). `data/` is private runtime storage. One worker per data directory is required. Interrupted paid requests pause on restart; unknown costs require operator reconciliation. The operator server is not deployed by GitHub Pages.
 
-Public spectators can read the board, records and results. Controls require the operator token; the UI retains it in memory for that page only. API keys are never entered in the browser. Static serving uses an explicit allowlist: `.env`, server sources and `data` files are excluded. Controls require a matching Origin and recognized Host. Add an arena link or embed on the portfolio after the server is hosted. A static portfolio upload cannot run this worker.
+`Dockerfile` and `compose.yaml` support an always-on HTTPS host with persistent storage. The Render blueprint is optional; free Render services sleep and have ephemeral storage, so they do not promise 24/7 operation. Hosting and API usage are separate costs.
 
-## Files and validation
+The original task prototype is at `/play.html`; the project study, printable kit and earlier portfolio/social drafts remain separate.
 
-- `index.html`, `arena/arena.css`, `arena/client.mjs`: live spectator arena.
-- `server.mjs`, `arena/game.mjs`, `arena/provider.mjs`: persistent runner, referee and OpenRouter integration.
-- `play.html`, `app.mjs`, `style.css`, `engine.mjs`, `content.mjs`: original human-play prototype.
-- `case-study.html`, `print.html`, `rules.md`, `output/pdf/terms-apply-kit.pdf`: project study and physical kit.
-- `portfolio-handoff.md`, `social-drafts.md`: website and campaign drafts.
-
-Run `npm test` and `npm run build:pages`. Rule tests and mocked provider tests verify mechanics and integration contracts, not real model performance. Physical playtesting and actual paid model validation remain to be done.
-
-Visual reference: https://impactbench.media.mit.edu/about. API reference: https://openrouter.ai/docs/api_reference/overview. Terms Apply is independent and has no MIT affiliation.
-
-### Learning from the money flow
-
-The property edition records each bank and player transfer. Select a player to see starting cash, rent collected, Start rewards, chance rewards, asset sales, purchases, houses, rent paid and tax. Cash reconciles as opening balance plus money in minus money out. Net worth adds property and house costs; selling to the bank realizes a half-value loss. Property inspection shows rent earned and a simple paid-visit payback example, without promising future visits.
-
-Pause and choose Next move to inspect a single bot decision. Changing playback pace preserves the current table. Demo players have distinct written strategies: Claude keeps cash, Gemini collects, Codex completes sets, Grok takes more building risk, and DeepSeek filters for rent relative to price. These are game personas, not measurements of the real models. Old saves recover their transactions by replaying retained moves; if the history is incomplete, accounting starts explicitly from the saved balance.
-
-### Guided learning
-
-“Learn step by step” opens six practice exercises with a prediction, worked answer, limits on the claim and a task to try on the live board. They cover cash versus wealth, transfers, cash reserves, marginal rent from houses, chance and fair comparisons, and AI attribution. The house exercise lets learners vary paying visitors and compare extra rent with the upgrade cost. Demo playback pauses while the lessons are open and restores its previous playback state on exit; the match is preserved. Real-model operators continue to control their shared runner separately.
-
-The live decision preview compares buying an available street with retaining cash. The practice exercises use fictional examples; they do not measure learning outcomes or real-model performance.
-
-### Choosing participants
-
-Choose players lets you select individual demo names, a count, or all five. Include me adds a human seat; a table needs at least two participants total. Replays, reloads, pace changes and automatic next games keep the roster. Leaving a one-opponent personal game adds a second bot so the spectator game remains playable. Participant changes start a fresh table. The public browser game supports up to six seats: five named demo strategies and you.
-
-### Three.js board and brand references
-
-The board uses a Monopoly-inspired mint surface, classic property color bands, a red Terms Apply title, metallic geometric tokens and roofed green houses. Angled and Top view controls change the camera without changing the game. Color is supported by visible player names and property labels.
-
-Brand marks are hosted locally from the sources documented in assets/brands/SOURCES.md. They identify demo personas; the page explicitly distinguishes these from verified model calls and does not imply brand endorsement. Codex uses OpenAI’s mark. No Monopoly logo or official game artwork is used.
-
-The game table keeps the live turn separate from player inspection. On phones, turn controls sit above the board. “Next move” pauses automatic play and advances one demo action. Player payments and lessons appear below the board; detailed ledgers and the money comparison open on demand. Tokens follow dice movement around the perimeter; forced relocations move directly to the destination.
-
-## News edition
-
-New games snapshot five sourced AI stories checked on October 8, 2026. News squares draw from this deck; any player can receive any card. The dated facts are separate from fictional cash effects, which reconcile through the same ledger as other chance payments. Saved games keep their own deck, and older saves finish under their earlier chance rules. This is an editorial snapshot, not an automatically refreshed feed or a ranking of real models. Source links and all five authored player profiles are available from the game.
+API documentation: [OpenRouter PKCE](https://openrouter.ai/docs/guides/overview/auth/oauth). Brand asset sources: `assets/brands/SOURCES.md`.

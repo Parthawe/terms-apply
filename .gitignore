@@ -9,3 +9,5 @@ _site/
 .site-build/
 
 arena/client.bundle.js
+
+arena/private-client.bundle.js

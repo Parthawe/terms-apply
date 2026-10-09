@@ -58,7 +58,7 @@ async function tick(){if(busy)return;if(!state.running){schedule();return;}busy=
 }
 const json=(res,status,body)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(body));};
 async function body(req){let txt='';for await(const chunk of req){txt+=chunk;if(txt.length>20000)throw Error('Request is too large.');}return JSON.parse(txt||'{}');}
-const allowed=new Set(['index.html','play.html','app.mjs','style.css','content.mjs','engine.mjs','case-study.html','print.html','rules.md','arena/client.mjs','arena/client.bundle.js','arena/arena.css','arena/experience.css','arena/game.mjs','arena/news.mjs','arena/provider.mjs','arena/browser-demo.mjs','assets/board.svg','assets/brands/claude.png','assets/brands/gemini.png','assets/brands/openai.svg','assets/brands/grok.svg','assets/brands/deepseek.ico','output/pdf/terms-apply-kit.pdf']);
+const allowed=new Set(['index.html','operator.html','privacy.html','play.html','app.mjs','style.css','content.mjs','engine.mjs','case-study.html','print.html','rules.md','arena/client.mjs','arena/client.bundle.js','arena/private-client.bundle.js','arena/play.css','arena/arena.css','arena/experience.css','arena/game.mjs','arena/news.mjs','arena/provider.mjs','arena/browser-demo.mjs','assets/board.svg','assets/brands/claude.png','assets/brands/gemini.png','assets/brands/openai.svg','assets/brands/grok.svg','assets/brands/deepseek.ico','output/pdf/terms-apply-kit.pdf']);
 const types={'.html':'text/html','.css':'text/css','.mjs':'text/javascript','.js':'text/javascript','.png':'image/png','.ico':'image/x-icon','.svg':'image/svg+xml','.pdf':'application/pdf','.md':'text/plain'};
 const server=http.createServer(async(req,res)=>{
  try{
@@ -92,7 +92,7 @@ const server=http.createServer(async(req,res)=>{
   if(url.pathname==='/api/export'){res.setHeader('Content-Disposition','attachment; filename="terms-apply-arena-record.json"');return json(res,200,publicState());}
   if(url.pathname==='/api/events'){res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache','Connection':'keep-alive'});clients.add(res);res.write(`data: ${JSON.stringify(publicState())}\n\n`);const beat=setInterval(()=>res.write(': heartbeat\n\n'),15000);req.on('close',()=>{clearInterval(beat);clients.delete(res);});return;}
   const path=decodeURIComponent(url.pathname).replace(/^\//,'')||'index.html';if(!allowed.has(path))return json(res,404,{error:'Not found.'});
-  const bytes=await readFile(resolve(root,path));res.writeHead(200,{'Content-Type':types[extname(path)]||'application/octet-stream','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; base-uri 'self'; frame-ancestors 'none'"});res.end(bytes);
+  const bytes=await readFile(resolve(root,path));res.writeHead(200,{'Content-Type':types[extname(path)]||'application/octet-stream','Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://openrouter.ai; img-src 'self' data:; base-uri 'self'; frame-ancestors 'none'"});res.end(bytes);
  }catch(e){json(res,400,{error:e.code==='ENOENT'?'Not found.':e.message});}
 });
 server.listen(port,host,()=>{console.log(`Terms Apply arena: http://${host}:${port}`);loadModels();schedule();});
