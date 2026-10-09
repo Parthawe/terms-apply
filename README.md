@@ -12,7 +12,7 @@ Everyone starts with $1,200. Roll locally, buy the street you reach or keep your
 
 The Three.js board uses familiar property-game colors and locally hosted brand marks. Phones default to the top view. Cash and street counts remain beside the board; **Details** contains property information, cash ledgers, strategies, sourced news and rules. Closing Details restores prior play. A finished match waits for an explicit Rematch or Change opponents action.
 
-News is a curated snapshot checked October 8, 2026. Factual stories link to their sources; their cash effects are fictional and apply equally to whoever draws them. Each match preserves its deck. Results describe this game, not general AI ability. Terms Apply has no MIT, Monopoly or model-provider affiliation.
+News is a sourced, versioned snapshot. A daily Codex follow-up checks for updates; the local host must be available for it to run. The site shows the last successful editorial check. Factual stories link to their sources; their cash effects are fictional and apply equally to whoever draws them. Each match preserves its deck. Results describe this game, not general AI ability. Terms Apply has no MIT, Monopoly or model-provider affiliation.
 
 ## Private real AI matches
 
@@ -26,7 +26,7 @@ AI dice are local. Only purchase and optional building decisions call a model. R
 
 The default match threshold is **$0.25**, adjustable before starting, with **80 requests maximum**. API spending is separate from fictional dollars. A threshold is an application stop condition, not a guaranteed billing cap: provider pricing, interrupted requests or incomplete usage can make billing uncertain. Set [provider-side key limits](https://openrouter.ai/settings/keys) and check [OpenRouter activity](https://openrouter.ai/activity). Failures, missing costs, wrong models and invalid actions pause the match. No silent bot substitution, automatic paid retry or automatic paid rematch occurs. Explicit Resume retries a recoverable decision; unresolved billing blocks resume.
 
-Saved private matches reopen paused and preserve `quick-v1` rules, turn limits, selected model IDs, the news snapshot and a credential-free usage record. An in-flight reservation recovered after reload is treated as unresolved billing. Earlier demo saves and the shared operator runner retain their original twenty-turn, three-house rules.
+Saved private matches reopen paused and preserve their versioned rules (`quick-v2` for new market games), turn limits, selected model IDs, the news snapshot and a credential-free usage record. An in-flight reservation recovered after reload is treated as unresolved billing. Earlier demo saves and the shared operator runner retain their original twenty-turn, three-house rules.
 
 **Verification:** automated tests use mocked credentials and provider responses. The public catalog and browser demo have been checked. A real-key paid smoke test has not been performed; the UI states that limitation.
 
@@ -66,3 +66,7 @@ The shared runner retains its original twenty-turn rules, server ledger, archive
 The original task prototype is at `/play.html`; the project study, printable kit and earlier portfolio/social drafts remain separate.
 
 API documentation: [OpenRouter PKCE](https://openrouter.ai/docs/guides/overview/auth/oauth). Brand asset sources: `assets/brands/SOURCES.md`.
+
+## Market events
+
+New games use `quick-v2`: confirmed IPOs show gross capital and listing fees as separate transfers; shareholder sales add no company cash; private funding is labeled capital, not operating revenue; outage recovery costs scale with owned streets. These effects are fictional teaching examples. Shares, dilution and stock prices are not simulated. Click the compact world-event link to see the source, business meaning and actual game calculation. Earlier matches keep their own rules and deck. See [news-maintenance.md](docs/news-maintenance.md) for the update contract.

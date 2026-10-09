@@ -8,7 +8,7 @@ export function requestBody(match){const p=active(match),actions=quickActions(ma
 export function estimateRequest(body,model){const bytes=new TextEncoder().encode(JSON.stringify(body)).length+1024;return bytes*model.promptPrice+body.max_tokens*model.completionPrice;}
 export function createPrivateRunner({credentials,storage=globalThis.localStorage,delay=900,seed=()=>Math.floor(Math.random()*0x7fffffff)}={}){
  let state={version:1,mode:'demo',match:startQuick(demoRoster.slice(0,2),1,seed()),started:false,paused:true,status:'ready',message:'',usage:{cost:0,reserved:0,requests:0,uncertain:false},budget:.25},timer=null,busy=false,epoch=0;const listeners=new Set();
- try{const s=JSON.parse(storage?.getItem(SAVE));if(s?.version===1&&s.match?.rulesVersion==='quick-v1'){state=s;state.paused=true;state.message=s.mode==='real'?'Reconnect OpenRouter, then resume your match.':'Your saved game is paused.';if(state.usage.reserved>0)state.usage.uncertain=true;}}catch{}
+ try{const s=JSON.parse(storage?.getItem(SAVE));if(s?.version===1&&['quick-v1','quick-v2'].includes(s.match?.rulesVersion)){state=s;state.paused=true;state.message=s.mode==='real'?'Reconnect OpenRouter, then resume your match.':'Your saved game is paused.';if(state.usage.reserved>0)state.usage.uncertain=true;}}catch{}
  function snapshot(){return structuredClone({...state,busy,connected:credentials?.connected()||false});}
  function emit(){try{storage?.setItem(SAVE,JSON.stringify(state));}catch{}listeners.forEach(fn=>fn(snapshot()));}
  function pause(message='Game paused.'){clearTimeout(timer);state.paused=true;state.message=message;emit();}

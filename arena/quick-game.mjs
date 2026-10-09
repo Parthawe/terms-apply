@@ -1,8 +1,9 @@
 import {startMatch,applyMove,legalActions,active,botMove,netWorth,observation} from './game.mjs';
+import {marketSnapshot} from './market-news.mjs';
 export function startQuick(opponents,id=1,seed=12345){
  if(opponents.length<1||opponents.length>5||new Set(opponents.map(p=>p.id)).size!==opponents.length)throw Error('Choose one to five distinct opponents.');
  const m=startMatch([{id:'human/you',name:'You',color:'#283d32',human:true},...opponents],id,seed);
- return {...m,rulesVersion:'quick-v1',turnLimit:10,houseLimit:1,purchaseResolved:false,buildResolved:false};
+ return {...m,...marketSnapshot(),rulesVersion:'quick-v2',turnLimit:10,houseLimit:1,purchaseResolved:false,buildResolved:false};
 }
 export function quickStage(m){
  if(m.finishedAt)return 'finished';if(m.phase==='roll')return 'roll';
@@ -26,4 +27,4 @@ export function quickApply(match,action,reason=''){
  return m;
 }
 export function quickBotMove(m){const move=botMove(m,active(m));const actions=quickActions(m);return actions.some(a=>sameAction(a,move.action))?move:{action:{type:'pass'},reason:move.reason};}
-export function quickObservation(m){const p=active(m),o=observation(m,p);o.rules='Ten turns each. Start with $1200. Highest cash plus original property and house values wins. Dice, rent, tax and news resolve locally. Buy a street or pass. Complete a color pair to double rent and unlock $100 houses: one per street, one building decision per turn. Resale on insolvency is half value. Select one supplied legal action. Future dice and news draws are hidden.';o.legalActions=quickActions(m);return o;}
+export function quickObservation(m){const p=active(m),o=observation(m,p);o.rules='Ten turns each. Start with $1200. Highest cash plus original property and house values wins. Dice, rent, tax and news resolve locally. Buy a street or pass. Complete a color pair to double rent and unlock $100 houses: one per street, one building decision per turn. Resale on insolvency is half value. Select one supplied legal action. Future dice and news draws are hidden.';o.newsRules=m.rulesVersion==='quick-v2'?'News is a dated snapshot of sourced facts with fictional effects. IPO: $200 capital in, $80 fees out. Funding is not profit. Outage: $20 per owned street, minimum $20. A secondary shareholder sale adds no company cash. Shares, dilution and stock prices are not simulated.': 'Use this match’s original news deck.';o.newsDeck=m.newsDeck?.map(({title,date,fact,status,category,mechanic,amount,capital,fee,perStreet})=>({title,date,fact,status,category,mechanic,amount,capital,fee,perStreet}));o.legalActions=quickActions(m);return o;}
