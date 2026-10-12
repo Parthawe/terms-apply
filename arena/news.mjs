@@ -1,5 +1,5 @@
-// Editorial snapshot, checked 2026-10-11. These are game analogies, not model ratings.
-export const newsChecked='2026-10-11';
+// Editorial snapshot, checked 2026-10-12. These are game analogies, not model ratings.
+export const newsChecked='2026-10-12';
 export const newsCards=[
  {id:'haiku-release',player:'Claude',date:'2026-10-07',title:'Anthropic introduces Claude Haiku 5.5',publisher:'Anthropic',url:'https://www.anthropic.com/claude-haiku-5-5',fact:'Anthropic announced a small model designed for high-volume, cost-sensitive work.',lesson:'A smaller model can change the cost of a repeated task. Check whether its quality is sufficient before switching.',amount:100,effect:'A lower-cost workflow saves you $100 in game cash.'},
  {id:'connected-apps',player:'Gemini',date:'2026-10-02',title:'Google’s September recap highlights connected apps',publisher:'Google',url:'https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-september-2026/',fact:'Google’s recap describes new Gemini connections to productivity and creative apps.',lesson:'Connected tools can reduce manual work. They also require choosing which data and permissions to share.',amount:80,effect:'A connected workflow earns you $80 in game cash.'},
@@ -17,7 +17,7 @@ export const playerProfiles={
 
 // Facts are sourced; these bounded cash effects are authored teaching examples.
 // Update only new-match decks. The referee reads the snapshot saved in the match.
-export const newsEdition='2026-10-11-market-v1';
+export const newsEdition='2026-10-12-market-v1';
 export const marketNews=[
  // The older app recap remains in the legacy deck; newer Gemini stories replace it here.
  ...newsCards.filter(c=>c.id!=='connected-apps').map(c=>({...c,status:'Confirmed',category:c.id==='service-outage'?'Outage':'Product launch',...(c.id==='service-outage'?{mechanic:'portfolio-cost',amount:-20,perStreet:20,effect:'Recovery costs $20 per street you own, with a $20 minimum.',lesson:'An outage can create recovery costs. In this fictional example, a larger portfolio costs more to restore; real incident costs are not measured by this card.'}:{mechanic:'cash'})})),
