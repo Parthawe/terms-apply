@@ -1,3 +1,4 @@
+import {turnSummary} from './turn-summary.mjs';
 import {createBoard} from './board3d.mjs';
 import {brandAsset} from './brands.mjs';
 import {demoRoster,spaces,active,owned,netWorth,finances,result,rent} from './game.mjs';
@@ -11,8 +12,8 @@ const families=['Claude','Gemini','OpenAI','Grok','DeepSeek'],demoFor=family=>de
 const credentials=createCredentials(),runner=createPrivateRunner({credentials,canAdvance:()=>!board?.isMoving()});let state,board,view='top',setupMode='demo',picked=new Set(['Claude','Gemini']),catalog=[],catalogStatus='idle',modelChoice=new Map(),detailTab='players',selectedPlayer='human/you',selectedSquare=null,setupWasRunning=false,detailsWasRunning=false,lastAnnouncement='',connectBusy=false,callbackBusy=false,expanded=false;
 function beginnerPlan(name){return playerProfiles[name]?.plan.replace(/builds up to (two|three) houses per street\./gi,t=>t[0]==='b'?'builds one house per street.':'Builds one house per street.');}
 function detailsInert(value){document.querySelectorAll('.topbar,main,footer,#setup-panel,#end-panel,.skip').forEach(el=>el.inert=value);document.querySelectorAll('.topbar,.play-rail,footer,.skip').forEach(el=>el.inert=value||expanded);}
-const dockHome=document.createComment('turn controls'),errorHome=document.createComment('game error');$('action-dock').before(dockHome);$('game-error').before(errorHome);
-function setExpanded(value){$('expanded-play').hidden=!value;if(value){$('expanded-play').append($('action-dock'),$('game-error'));}else{dockHome.after($('action-dock'));errorHome.after($('game-error'));}expanded=value;document.body.classList.toggle('board-expanded',value);$('expand-board').textContent=value?'Back to game':'Expand board';$('expand-board').setAttribute('aria-pressed',String(value));detailsInert(false);$('expand-board').focus();}
+const dockHome=document.createComment('turn controls'),errorHome=document.createComment('game error'),resultHome=document.createComment('turn result');$('move-result').before(resultHome);$('action-dock').before(dockHome);$('game-error').before(errorHome);
+function setExpanded(value){$('expanded-play').hidden=!value;if(value){$('expanded-play').append($('move-result'),$('action-dock'),$('game-error'));}else{resultHome.after($('move-result'));dockHome.after($('action-dock'));errorHome.after($('game-error'));}expanded=value;document.body.classList.toggle('board-expanded',value);$('expand-board').textContent=value?'Back to game':'Expand board';$('expand-board').setAttribute('aria-pressed',String(value));detailsInert(false);$('expand-board').focus();}
 function cameraChanged(value){$('board-zoom').value=Math.round(value*100);$('zoom-level').textContent=Math.round(value*100)+'%';$('zoom-out').disabled=value<=1;$('zoom-in').disabled=value>=3;}
 function setView(value){view=value;board?.setView(value);$('angled').setAttribute('aria-pressed',String(value==='angled'));$('top').setAttribute('aria-pressed',String(value==='top'));}
 function render(s){const focusWasMove=$('move-buttons').contains(document.activeElement);state=s;const m=s.match,p=active(m),you=m.players.find(p=>p.model.human),stage=quickStage(m);
@@ -23,8 +24,11 @@ function render(s){const focusWasMove=$('move-buttons').contains(document.active
  $('expanded-turn').textContent=`${p.model.name}${s.paused?' · paused':''} · ${money(p.cash)} cash · Round ${Math.min(10,p.turns+1)}/10`;$('expanded-pause').hidden=!s.started||!!m.finishedAt;$('expanded-pause').textContent=s.paused?'Resume':'Pause';
  $('player-count').textContent=m.players.length+' players · cash / streets'+(m.players.length>3?' · scroll for all':'');
  $('roster').innerHTML=m.players.map(p=>`<button class="player" data-player="${esc(p.model.id)}" aria-current="${s.started&&!m.finishedAt&&p===active(m)}" aria-label="Inspect ${esc(p.model.name)}, ${money(p.cash)} cash, ${owned(m,p).length} properties">${mark(p)}<span><strong>${esc(p.model.name)}</strong><small>${p.bankrupt?'Out':money(p.cash)+' · '+owned(m,p).length+' streets'}</small></span></button>`).join('');
- const latest=m.events.findLast(e=>e.action.type!=='end');const text=latest?`${latest.name}: ${latest.outcome}`:'Start with $1,200. Buy streets, collect rent from visitors, and finish with the most wealth.';if(text!==lastAnnouncement){$('outcome').textContent=text;lastAnnouncement=text;}
- const after=id=>{const player=m.players.find(p=>p.model.id===id);return player?' · '+player.model.name+' now '+money(player.cash):'';};const who=id=>id==='bank'?'Bank':m.players.find(p=>p.model.id===id)?.model.name||id;$('payments').innerHTML=(latest?.transfers||[]).map(t=>`<span class="payment ${t.from==='human/you'?'out':''}">${esc(who(t.from))} → ${esc(who(t.to))} ${money(t.amount)}${esc(after(t.from))}${esc(after(t.to))}</span>`).join('');
+ const summary=turnSummary(m),text=summary?.outcome||'Start with $1,200. Buy streets, collect rent from visitors, and finish with the most wealth.';
+ $('result-title').hidden=!summary;$('result-title').textContent=summary?.title||'';
+ if(text!==lastAnnouncement){$('outcome').textContent=text;lastAnnouncement=text;}
+ $('payments').innerHTML=summary?.payments.map(t=>`<span class="payment">${esc(t)}</span>`).join('')||'';
+ $('cash-left').textContent=summary?[summary.noPayment,summary.cash].filter(Boolean).join(' '):'';
  $('turn-history').hidden=!m.events.some(e=>e.action.type!=='end');
  $('world-event').hidden=!m.lastNews;$('world-event').textContent=m.lastNews?`${m.lastNews.category||'News'} · ${m.lastNews.title} · Why it matters`:'';
  $('api-spend').hidden=s.mode!=='real';$('api-spend').textContent=`API spending ${usd(s.usage.cost)} / $${s.budget.toFixed(2)} · ${s.usage.requests}/80 requests${s.usage.reserved?' · '+usd(s.usage.reserved)+' reserved':''}${s.usage.uncertain?' · billing unresolved':''}`;
