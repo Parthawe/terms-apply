@@ -1,0 +1,9 @@
+# Terms Apply design direction
+
+Apple-inspired consumer game UI, implemented with native CSS. This is an independent project, not an Apple framework or affiliation.
+
+Use system sans-serif type, near-black ink, light gray page surfaces, white controls, and blue primary actions. Keep the board's property colors, model logos, original content, routes, keyboard controls and privacy text. The Three.js board remains the product demonstration.
+
+The shared design.css theme covers the game, setup, details, results, privacy, original prototype, project study and printable-kit screen. Print media keeps the original kit geometry and typography. Desktop reading pages use generous space; the game keeps compact controls so phone play remains possible without scrolling in expanded mode.
+
+QA must cover six-player roll and purchase states at phone sizes, the OpenRouter setup without credentials, details and recovery, results, privacy, the project study, legacy prototype and print preparation. Do not make paid requests as part of visual checks.
