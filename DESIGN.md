@@ -7,3 +7,5 @@ Use system sans-serif type, near-black ink, light gray page surfaces, white cont
 The shared design.css theme covers the game, setup, details, results, privacy, original prototype, project study and printable-kit screen. Print media keeps the original kit geometry and typography. Desktop reading pages use generous space; the game keeps compact controls so phone play remains possible without scrolling in expanded mode.
 
 QA must cover six-player roll and purchase states at phone sizes, the OpenRouter setup without credentials, details and recovery, results, privacy, the project study, legacy prototype and print preparation. Do not make paid requests as part of visual checks.
+
+The 3D game uses locally generated paper grain, woven felt, satin token and glazed dice materials. Custom surface shaders extend Three.js PBR instead of replacing lighting and shadows. Street labels remain separate untextured planes. Shader effects are static, use small shared mipmapped textures, and avoid post-processing or external asset requests.
