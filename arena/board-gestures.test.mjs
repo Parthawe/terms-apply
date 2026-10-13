@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {attachBoardGestures} from './board-gestures.mjs';
+function setup(initial=1){const handlers={},taps=[],pans=[];let zoom=initial;const canvas={addEventListener:(type,fn)=>handlers[type]=fn,setPointerCapture(){}};attachBoardGestures(canvas,{getZoom:()=>zoom,setZoom:z=>zoom=Math.max(1,Math.min(3,z)),pointAt:(x,z)=>({x,z}),panBy:(x,z)=>pans.push([x,z]),onTap:(x,z)=>taps.push([x,z])});return {fire(type,id,x,y){handlers[type]({type,pointerId:id,button:0,clientX:x,clientY:y});},taps,pans,zoom:()=>zoom};}
+test('a street tap opens details while a drag only pans',()=>{const s=setup(2);s.fire('pointerdown',1,100,100);s.fire('pointerup',1,100,100);assert.deepEqual(s.taps,[[100,100]]);s.fire('pointerdown',2,100,100);s.fire('pointermove',2,150,120);s.fire('pointerup',2,150,120);assert.equal(s.taps.length,1);assert.ok(s.pans.length);});
+test('pinch changes zoom without opening a street, even when fingers lift separately',()=>{const s=setup();s.fire('pointerdown',1,100,100);s.fire('pointerdown',2,200,100);s.fire('pointermove',2,300,100);assert.equal(s.zoom(),2);s.fire('pointerup',2,300,100);s.fire('pointerup',1,100,100);assert.equal(s.taps.length,0);});
+test('cancelled gestures do not open details and zoom remains bounded',()=>{const s=setup();s.fire('pointerdown',1,100,100);s.fire('pointercancel',1,100,100);assert.equal(s.taps.length,0);s.fire('pointerdown',2,100,100);s.fire('pointerdown',3,200,100);s.fire('pointermove',3,900,100);assert.equal(s.zoom(),3);});
+
+import {createPrivateRunner} from './private-runner.mjs';
+import {demoRoster,active} from './game.mjs';
+test('the next AI turn waits for the visible piece to land',async()=>{let ready=false;const r=createPrivateRunner({storage:null,delay:100000,canAdvance:()=>ready,seed:()=>7});try{r.start([demoRoster[0]]);r.move({type:'roll'});if(active(r.snapshot().match).model.human)r.move({type:'pass'});const before=r.snapshot().match;assert.equal(active(before).model.human,undefined);await r.tick();assert.deepEqual(r.snapshot().match,before);assert.equal(r.snapshot().usage.requests,0);ready=true;await r.tick();assert.equal(r.snapshot().match.lastRoll.player,demoRoster[0].id);}finally{r.dispose();}});
