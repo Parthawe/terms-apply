@@ -13,16 +13,18 @@ export function createPrivateRunner({credentials,storage=globalThis.localStorage
  function snapshot(){return structuredClone({...state,busy,connected:credentials?.connected()||false});}
  function emit(){try{storage?.setItem(SAVE,JSON.stringify(state));}catch{}listeners.forEach(fn=>fn(snapshot()));}
  function pause(message='Game paused.'){clearTimeout(timer);state.paused=true;state.message=message;emit();}
- function schedule(){clearTimeout(timer);if(state.started&&!state.paused&&!state.match.finishedAt&&!active(state.match).model.human)timer=setTimeout(tick,Math.max(delay,state.match.events.findLast(e=>e.action.type!=='end')?.action.type==='roll'?DICE_ROLL_SECONDS*1000+state.match.dice.reduce((a,b)=>a+b,0)*170+150:0));}
+ function schedule(){clearTimeout(timer);if(state.started&&!state.paused&&!state.pendingNews&&!state.match.finishedAt&&!active(state.match).model.human)timer=setTimeout(tick,Math.max(delay,state.match.events.findLast(e=>e.action.type!=='end')?.action.type==='roll'?DICE_ROLL_SECONDS*1000+state.match.dice.reduce((a,b)=>a+b,0)*170+150:0));}
+ function apply(action,reason){const previous=state.match.lastNews?.tick;state.match=quickApply(state.match,action,reason);if(state.match.lastNews?.tick!==previous&&state.match.lastNews)state.pendingNews=state.match.lastNews.tick;}
+ function continueNews(){if(!state.pendingNews)return;if(!canAdvance())throw Error('Wait for the piece to land.');state.pendingNews=null;emit();schedule();}
  function resetUsage(){state.usage={cost:0,reserved:0,requests:0,uncertain:false};}
  function start(opponents,mode='demo',budget=.25){if(busy)throw Error('Wait for the current request or disconnect before starting another match.');if(!['demo','real'].includes(mode))throw Error('Choose a valid player source.');if(mode==='real'&&!credentials?.connected())throw Error('Connect OpenRouter first.');if(!Number.isFinite(budget)||budget<.01||budget>10)throw Error('Choose a spending threshold between $0.01 and $10.');
   if(mode==='real'&&opponents.some(m=>!m.id||!Number.isFinite(m.promptPrice)||!Number.isFinite(m.completionPrice)))throw Error('Choose models from the current catalog.');
-  epoch++;clearTimeout(timer);state.match=startQuick(opponents,state.match.id+1,seed());state.mode=mode;state.budget=budget;state.started=true;state.paused=false;state.status='playing';state.message='';resetUsage();emit();schedule();
+  epoch++;clearTimeout(timer);state.pendingNews=null;state.match=startQuick(opponents,state.match.id+1,seed());state.mode=mode;state.budget=budget;state.started=true;state.paused=false;state.status='playing';state.message='';resetUsage();emit();schedule();
  }
- async function tick(){if(busy||state.paused||state.match.finishedAt||!state.started||active(state.match).model.human)return;if(!canAdvance()){clearTimeout(timer);timer=setTimeout(tick,100);return;}busy=true;const generation=epoch;emit();try{
+ async function tick(){if(busy||state.paused||state.pendingNews||state.match.finishedAt||!state.started||active(state.match).model.human)return;if(!canAdvance()){clearTimeout(timer);timer=setTimeout(tick,100);return;}busy=true;const generation=epoch;emit();try{
   const stage=quickStage(state.match);
-  if(stage==='roll')state.match=quickApply(state.match,{type:'roll'},'Dice rolled locally.');
-  else if(state.mode==='demo'){const move=quickBotMove(state.match);state.match=quickApply(state.match,move.action,move.reason);}
+  if(stage==='roll')apply({type:'roll'},'Dice rolled locally.');
+  else if(state.mode==='demo'){const move=quickBotMove(state.match);apply(move.action,move.reason);}
   else{
    if(!credentials.connected())throw Error('Reconnect OpenRouter to continue.');
    if(state.usage.uncertain)throw Error('A request has unresolved billing. Check OpenRouter activity before starting a new match.');
@@ -39,13 +41,13 @@ export function createPrivateRunner({credentials,storage=globalThis.localStorage
    if(!answer||typeof answer.reason!=='string'||!quickActions(state.match).some(a=>sameAction(a,answer.action)))throw Error('The model returned an unavailable move. Retry this decision; no move was substituted.');
    // Never persist provider prose verbatim: credentials must not enter game records.
    const reason=(credentials.redact?.(answer.reason)||answer.reason).replace(/sk-or-[A-Za-z0-9_-]+/g,'[redacted]').slice(0,160);
-   state.match=quickApply(state.match,answer.action,reason);
+   apply(answer.action,reason);
    if(state.usage.cost>state.budget)pause('The reported cost exceeded the application threshold. No further requests will be made.');
   }
   if(state.match.finishedAt){state.paused=true;state.status='finished';state.message='Game complete.';}
  }catch(e){state.paused=true;state.message=e.message;state.status='paused';}finally{busy=false;emit();schedule();}}
- function move(action){if(busy||state.paused||!state.started||!active(state.match).model.human)throw Error('Wait for your turn or resume the game.');state.match=quickApply(state.match,action,'You chose this move.');state.message='';if(state.match.finishedAt){state.paused=true;state.status='finished';}emit();schedule();}
+ function move(action){if(busy||state.paused||state.pendingNews||!state.started||!active(state.match).model.human)throw Error('Wait for your turn or resume the game.');apply(action,'You chose this move.');state.message='';if(state.match.finishedAt){state.paused=true;state.status='finished';}emit();schedule();}
  function resume(){if(state.match.finishedAt)return;if(state.mode==='real'&&!credentials.connected())throw Error('Reconnect OpenRouter to continue.');if(state.usage.uncertain)throw Error('Billing is unresolved. Check OpenRouter activity before starting another match.');state.paused=false;state.message='';state.status='playing';emit();schedule();}
  const unsub=credentials?.onChange(connected=>{if(!connected&&state.mode==='real'){epoch++;pause('OpenRouter disconnected. Reconnect to continue.');}});
- return {start,move,pause,resume,snapshot,tick,subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn);},export:()=>JSON.stringify(state,null,2),dispose(){clearTimeout(timer);unsub?.();listeners.clear();}};
+ return {start,move,pause,resume,continueNews,snapshot,tick,subscribe(fn){listeners.add(fn);fn(snapshot());return()=>listeners.delete(fn);},export:()=>JSON.stringify(state,null,2),dispose(){clearTimeout(timer);unsub?.();listeners.clear();}};
 }

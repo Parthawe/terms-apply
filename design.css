@@ -85,3 +85,9 @@
 @media(max-width:760px){.move-result .news-flash p{font-size:12px;grid-template-columns:55px minmax(0,1fr);gap:6px}.news-flash{padding-top:6px;margin-top:5px}.expanded-play .news-flash .world-event{display:block;min-height:28px}.news-item h3{font-size:20px}.news-item h4+p{font-size:14px}}
 
 .move-result.news-turn #result-title,.move-result.news-turn #outcome,.move-result.news-turn #payments,.move-result.news-turn #cash-left{display:none}.news-turn .news-flash{border:0;margin-top:0;padding-top:0}
+
+/* A news draw holds the match until the reader continues. */
+.news-reading{width:min(520px,calc(100vw - 24px));max-height:calc(100dvh - 24px);padding:0;border:1px solid var(--rule);border-radius:12px;background:var(--paper);color:var(--ink);overflow:hidden}
+.news-reading[open]{display:flex;flex-direction:column}.news-reading::backdrop{background:rgba(15,20,30,.55)}
+.news-reading-scroll{overflow:auto;min-height:0;padding:24px}.news-reading h2{font-size:25px;line-height:1.15;letter-spacing:-.02em;margin:8px 0 16px}.news-reading h3{font-size:13px;margin:20px 0 6px;color:var(--muted)}.news-reading p{font-size:14px;line-height:1.5;margin:6px 0 12px}.news-reading p.small{font-size:12px}.news-reading .news-reading-cash{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}.news-reading .news-effect h3{margin-top:0}.news-reading a{display:inline-block;font-size:13px;min-height:32px;padding:6px 0}.news-reading-footer{padding:12px 24px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--rule);flex:none;background:var(--paper)}.news-reading-footer button{width:100%;min-height:48px}
+@media(max-width:760px){.news-reading-scroll{padding:18px}.news-reading-footer{padding-left:18px;padding-right:18px}.news-reading h2{font-size:22px}.news-reading .news-reading-cash{font-size:17px}}
