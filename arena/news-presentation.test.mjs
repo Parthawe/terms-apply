@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {newsPresentation} from './news-presentation.mjs';
+const fixture=()=>({lastNews:{tick:4,title:'An IPO',amount:190},events:[{id:4,name:'You',player:'human',cashAfter:1590,transfers:[{from:'bank',to:'human',amount:200,category:'start'},{from:'bank',to:'human',amount:200,category:'chance'},{from:'human',to:'bank',amount:10,category:'chance'}]}]});
+test('news separates IPO capital and fees from other payments on the same turn',()=>{const m=fixture(),n=newsPresentation(m);assert.equal(n.net,190);assert.equal(n.breakdown,'$200 in − $10 out = $190 net.');assert.equal(n.cash,'You: gained $190 · $1,590 after this turn.');m.events.push({id:5,cashAfter:10});assert.equal(newsPresentation(m).cash,n.cash);});
+test('news reports recorded payments even when saved rules or insolvency change the authored amount',()=>{const m=fixture();m.lastNews.amount=-100;m.events[0].transfers=[{from:'human',to:'bank',amount:30,category:'chance'},{from:'bank',to:'human',amount:15,category:'sale'}];m.events[0].cashAfter=0;assert.equal(newsPresentation(m).cash,'You: paid $30 · $0 after this turn.');});
+test('zero-cash cards and missing saved history do not invent balances',()=>{const m=fixture();m.events[0].transfers=[];assert.match(newsPresentation(m).cash,/no cash change/);m.events=[];assert.match(newsPresentation(m).cash,/unavailable/);m.lastNews=null;assert.equal(newsPresentation(m),null);});
