@@ -16,7 +16,7 @@ function soundControl(){const s=audio.status(),button=$('toggle-sound');button.d
 const audio=createGameAudio({onChange:soundControl}),paymentSounds=createPaymentSoundQueue(kind=>audio.play(kind));
 const soundHome=document.createComment('sound control');$('toggle-sound').before(soundHome);
 $('toggle-sound').onclick=()=>audio.setMuted(!audio.status().muted);soundControl();
-addEventListener('pointerdown',()=>audio.unlock(),{capture:true});addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')audio.unlock();},{capture:true});
+addEventListener('pointerdown',()=>audio.unlock(),{capture:true});addEventListener('click',()=>audio.unlock(),{capture:true});addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')audio.unlock();},{capture:true});
  document.addEventListener('visibilitychange',()=>{if(document.hidden){audio.suspend();paymentSounds.clear();}else audio.resumeExisting();});addEventListener('pagehide',()=>audio.suspend());
 function beginnerPlan(name){return playerProfiles[name]?.plan.replace(/builds up to (two|three) houses per street\./gi,t=>t[0]==='b'?'builds one house per street.':'Builds one house per street.');}
 function detailsInert(value){document.querySelectorAll('.topbar,main,footer,#setup-panel,#end-panel,.skip').forEach(el=>el.inert=value);document.querySelectorAll('.topbar,.play-rail,footer,.skip').forEach(el=>el.inert=value||expanded);}

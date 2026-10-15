@@ -27,3 +27,8 @@ test('rent chimes wait for landing, play once, and never replay saved history',(
 test('pausing cancels pending payments and zero transfers make no sound',()=>{
  const plays=[],queue=createPaymentSoundQueue(kind=>plays.push(kind)),match={id:1,tick:0,events:[]};queue.observe(match);match.tick=1;match.events=[{id:1,transfers:[{amount:50}]}];queue.observe(match,{moving:true});queue.observe(match,{paused:true});queue.observe(match);assert.equal(plays.length,0);match.tick=2;match.events.push({id:2,transfers:[{amount:0}]});queue.observe(match);assert.equal(plays.length,0);
 });
+
+test('pausing during browser audio unlock cancels deferred sounds',async()=>{
+ const fake=fakeAudio();fake.context.state='suspended';let resolve;const resumed=new Promise(r=>resolve=r);fake.context.resume=()=>resumed;
+ const audio=createGameAudio({storage:null,visible:()=>true,makeContext:()=>fake.context});audio.unlock();audio.play('dice');audio.stop();fake.context.state='running';resolve();await resumed;await Promise.resolve();assert.equal(fake.starts.length,0);
+});

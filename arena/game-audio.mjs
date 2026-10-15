@@ -1,9 +1,9 @@
 const MUTE_KEY='terms-apply-sound-muted';
 export function createGameAudio({storage=globalThis.localStorage,makeContext=()=>{const Audio=globalThis.AudioContext||globalThis.webkitAudioContext;return Audio?new Audio():null;},visible=()=>!globalThis.document?.hidden,onChange=()=>{}}={}){
- let muted=false,context=null,master=null,noise=null,unavailable=false;const voices=new Set();
+ let muted=false,context=null,master=null,noise=null,unavailable=false,epoch=0;const voices=new Set();
  try{muted=storage?.getItem(MUTE_KEY)==='true';}catch{}
  function status(){return {muted,unavailable};}
- function stop(){for(const node of voices){try{node.stop();}catch{}}voices.clear();}
+ function stop(){epoch++;for(const node of voices){try{node.stop();}catch{}}voices.clear();}
  function unlock(){
   if(muted||!visible()||unavailable)return;
   try{
@@ -20,7 +20,8 @@ export function createGameAudio({storage=globalThis.localStorage,makeContext=()=
   const oscillator=context.createOscillator(),gain=context.createGain();oscillator.type=type;oscillator.frequency.setValueAtTime(pitch,time);oscillator.frequency.exponentialRampToValueAtTime(endPitch,time+length);envelope(gain,time,length,level);oscillator.connect(gain);gain.connect(master);keep(oscillator,[gain]);oscillator.start(time);oscillator.stop(time+length+.01);
  }
  function play(kind){
-  if(muted||!visible()||!context||context.state!=='running')return false;
+  if(muted||!visible()||!context||context.state==='closed')return false;
+  if(context.state!=='running'){const version=epoch,requested=Date.now();try{context.resume()?.then(()=>{if(context.state==='running'&&epoch===version&&Date.now()-requested<500)play(kind);}).catch(()=>{});}catch{}return false;}
   const now=context.currentTime;
   try{
    if(kind==='dice')for(const [i,offset] of [.015,.085,.17,.29,.43,.56,.68,.83,1.04].entries()){tap(now+offset,1100+(i%3)*450,.55-i*.035,.045);tone(now+offset,240+(i%2)*60,110,.12,.055);}
