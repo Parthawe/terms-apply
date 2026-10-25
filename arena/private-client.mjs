@@ -1,7 +1,7 @@
 import {createGameAudio,createPaymentSoundQueue} from './game-audio.mjs';
 import {scoreboard} from './scoreboard.mjs';
 import {newsCardHTML,newsCashHTML} from './news-view.mjs';
-import {newsPresentation,recentNews} from './news-presentation.mjs';
+import {newsPresentation,recentNews,boardNewsSummary} from './news-presentation.mjs';
 import {turnSummary} from './turn-summary.mjs';
 import {createBoard} from './board3d.mjs';
 import {brandAsset} from './brands.mjs';
@@ -41,7 +41,7 @@ function render(s){if(s.paused)audio.stop();const focusWasMove=$('move-buttons')
  $('payments').innerHTML=summary?.payments.map(t=>`<span class="payment">${esc(t)}</span>`).join('')||'';
  $('cash-left').textContent=summary?[summary.noPayment,summary.cash].filter(Boolean).join(' '):'';
  $('turn-history').hidden=!m.events.some(e=>e.action.type!=='end');const newsCount=recentNews(m).length;$('recent-news').textContent=$('end-news').textContent='News cards'+(newsCount?' ('+newsCount+')':'');
- const news=newsPresentation(m),newsTurn=!!news&&m.events.findLast(e=>e.action.type!=='end')?.id===news.card.tick;$('move-result').classList.toggle('news-turn',newsTurn);$('news-flash').hidden=!newsTurn;if(news){$('news-headline').textContent=news.card.title;$('news-cash').textContent=news.cash;}
+ const news=newsPresentation(m),newsTurn=!!news&&m.events.findLast(e=>e.action.type!=='end')?.id===news.card.tick;$('move-result').classList.toggle('news-turn',newsTurn);const newsSummary=boardNewsSummary(news);$('news-flash').hidden=!newsSummary;if(newsSummary){$('news-cash').textContent=newsSummary.headline;$('news-reason').textContent=newsSummary.reason;}
  $('api-spend').hidden=s.mode!=='real';$('api-spend').textContent=`API spending ${usd(s.usage.cost)} / $${s.budget.toFixed(2)} · ${s.usage.requests}/80 requests${s.usage.reserved?' · '+usd(s.usage.reserved)+' reserved':''}${s.usage.uncertain?' · billing unresolved':''}`;
  $('pause-game').hidden=!s.started||!!m.finishedAt;$('pause-game').textContent=s.paused?'Resume':'Pause';$('board-hint').textContent=s.started?(s.mode==='real'?'Fictional game dollars · API charges separate':'Free demo · no API charges'):'Roll. Buy or pass. Collect rent.';
  $('game-error').textContent=s.message&&s.started&&s.paused&&!m.finishedAt?s.message:'';

@@ -104,3 +104,7 @@
 
 /* Start with the consequence, then read the source story. */
 .news-views{margin-top:12px}.news-view-note{margin-bottom:16px}.news-item:first-of-type>h3{margin-top:12px}.news-item:first-of-type{padding-top:0}.news-reading .news-effect{margin-top:12px}.news-reading .news-reading-cash{margin-bottom:10px}
+
+/* The last news result stays with the board until another card is drawn. */
+.move-result .news-flash .news-board-reason{display:block;font-size:12px;line-height:1.4;margin:3px 0 0;overflow-wrap:anywhere}.news-flash .news-game span{color:var(--ink)}
+@media(max-width:760px){.move-result .news-flash .news-game{grid-template-columns:55px minmax(0,1fr);font-size:12px}.expanded-play .news-flash{padding-top:4px;margin-top:4px}.expanded-play .move-result .news-flash .news-board-reason{font-size:11px;line-height:1.35}.expanded-play .move-result:has(.news-flash:not([hidden])) #cash-left{display:none}}

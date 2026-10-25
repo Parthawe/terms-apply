@@ -23,3 +23,15 @@ export function recentNews(match){
  if(match.lastNews&&!rows.some(row=>row.card.tick===match.lastNews.tick))rows.unshift({...newsPresentation(match),eventId:match.lastNews.tick});
  return rows.slice(0,20);
 }
+
+// Keep the last recorded draw visible while later turns continue.
+export function boardNewsSummary(news){
+ if(!news)return null;
+ const name=news.playerName||news.card.drawnBy||'Player';
+ const amount=n=>'$'+Math.abs(n).toLocaleString('en-US');
+ const change=Number.isFinite(news.net)?news.net>0?'gained '+amount(news.net):news.net<0?'paid '+amount(news.net):'no cash change':'cash result unavailable';
+ const explanation=news.card.impact?.explanation||news.card.effect||'The reason was not recorded in this saved game.';
+ const minimum=explanation.match(/^\$(\d+) × 1 minimum unit/);
+ const reason=minimum?`Recovery has a $${minimum[1]} minimum, even with no streets.`:explanation.split(/(?<=[.!?])\s+(?=[A-Z])/)[0];
+ return {headline:`${name}: ${change}`,reason};
+}
