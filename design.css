@@ -101,3 +101,6 @@
 @media(max-width:760px){.news-reading p{font-size:15px}.news-reading h3{font-size:13px;color:var(--ink)}.news-cash-ledger>div{gap:10px}.news-reading .news-cash-ledger{font-size:13px}.recent-news-entry h3,.news-item>h3{font-size:21px}}
 
 .news-card-impact{font-weight:650;font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}.details-panel:has(.news-views)>.section-head{position:sticky;top:-20px;background:var(--paper);z-index:2;padding:12px 0}
+
+/* Start with the consequence, then read the source story. */
+.news-views{margin-top:12px}.news-view-note{margin-bottom:16px}.news-item:first-of-type>h3{margin-top:12px}.news-item:first-of-type{padding-top:0}.news-reading .news-effect{margin-top:12px}.news-reading .news-reading-cash{margin-bottom:10px}
