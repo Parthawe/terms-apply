@@ -8,7 +8,8 @@ export function newsPresentation(match,card=match.lastNews){
  const outgoing=rows.filter(t=>t.from===event.player).reduce((sum,t)=>sum+t.amount,0);
  const dollars=n=>'$'+Math.round(n).toLocaleString('en-US'),net=incoming-outgoing;
  const change=net>0?'gained '+dollars(net):net<0?'paid '+dollars(-net):'no cash change';
- return {card,incoming,outgoing,net,cash:`${event.name}: ${change} · ${dollars(event.cashAfter)} after this turn.`,breakdown:incoming&&outgoing?`${dollars(incoming)} in − ${dollars(outgoing)} out = ${dollars(net)} net.`:''};
+ const cashSteps=(event.transfers||[]).filter(t=>t.to===event.player||t.from===event.player).map(t=>({label:({chance:t.to===event.player?'News from bank':'News paid to bank',start:'Passed Start',sale:'Property sold to bank',rent:'Rent',tax:'Compute tax',purchase:'Street purchase',build:'House purchase'})[t.category]||'Other payment',amount:t.to===event.player?t.amount:-t.amount}));
+ return {card,incoming,outgoing,net,playerName:event.name,cashBefore:event.cashBefore,cashAfter:event.cashAfter,cashSteps,cash:`${event.name}: ${change} · ${dollars(event.cashAfter)} after this turn.`,breakdown:incoming&&outgoing?`${dollars(incoming)} in − ${dollars(outgoing)} out = ${dollars(net)} net.`:''};
 }
 
 // Older saves retain their recorded payments even when the original story was not saved.
