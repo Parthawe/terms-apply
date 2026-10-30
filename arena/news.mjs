@@ -1,5 +1,5 @@
-// Editorial snapshot, checked 2026-10-29. These are game analogies, not model ratings.
-export const newsChecked='2026-10-29';
+// Editorial snapshot, checked 2026-10-30. These are game analogies, not model ratings.
+export const newsChecked='2026-10-30';
 export const newsCards=[
  {id:'haiku-release',player:'Claude',date:'2026-10-07',title:'Anthropic introduces Claude Haiku 5.5',publisher:'Anthropic',url:'https://www.anthropic.com/claude-haiku-5-5',fact:'Anthropic announced a small model designed for high-volume, cost-sensitive work.',lesson:'A smaller model can change the cost of a repeated task. Check whether its quality is sufficient before switching.',amount:100,effect:'A lower-cost workflow saves you $100 in game cash.'},
  {id:'connected-apps',player:'Gemini',date:'2026-10-02',title:'Google’s September recap highlights connected apps',publisher:'Google',url:'https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-september-2026/',fact:'Google’s recap describes new Gemini connections to productivity and creative apps.',lesson:'Connected tools can reduce manual work. They also require choosing which data and permissions to share.',amount:80,effect:'A connected workflow earns you $80 in game cash.'},
@@ -17,7 +17,7 @@ export const playerProfiles={
 
 // Facts are sourced; these bounded cash effects are authored teaching examples.
 // Update only new-match decks. The referee reads the snapshot saved in the match.
-export const newsEdition='2026-10-29-market-v1';
+export const newsEdition='2026-10-30-market-v1';
 export const marketNews=[
  // Older stories remain in the legacy deck; new matches use this dated market snapshot.
  {id:'forge-nano-completed-merger',player:'Market',date:'2026-10-21',category:'SPAC merger',status:'Completed merger · dated trading plan',title:'Forge Nano completes its merger to go public',publisher:'SEC · Forge Nano announcement',url:'https://www.sec.gov/Archives/edgar/data/2101833/000110465926117880/tm2628070d1_ex99-1.htm',fact:'Forge Nano, a semiconductor-equipment and materials company, announced completion of its merger with Archimedes Tech SPAC Partners II on October 21. The announcement expected Nasdaq trading to begin on October 22 as NANO; it does not itself confirm that trading began.',lesson:'A completed SPAC merger is a different route to public markets from a traditional IPO. Check closing and trading separately. A listing milestone is not sales revenue or operating profit.',mechanic:'cash',amount:0,effect:'Your fictional company records a completed merger and receives $0 in this lesson. This authored example does not model Forge Nano’s transaction proceeds, fees or stock price.'},
